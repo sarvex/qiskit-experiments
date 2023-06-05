@@ -37,7 +37,7 @@ def load_fit_parameters(docstring_lines: List[str]) -> List[str]:
     }
 
     # parse lines
-    parameter_desc = dict()
+    parameter_desc = {}
     current_param = None
     current_item = None
     for line in docstring_lines:
@@ -66,11 +66,11 @@ def load_fit_parameters(docstring_lines: List[str]) -> List[str]:
         # add line if parameter and item are already set
         if current_param and current_item:
             if parameter_desc[current_param][current_item]:
-                parameter_desc[current_param][current_item] += " " + line.lstrip()
+                parameter_desc[current_param][current_item] += f" {line.lstrip()}"
             else:
                 parameter_desc[current_param][current_item] = line.lstrip()
 
-    section_lines = list()
+    section_lines = []
 
     def write_description(header: str, kind: str):
         section_lines.append(header)

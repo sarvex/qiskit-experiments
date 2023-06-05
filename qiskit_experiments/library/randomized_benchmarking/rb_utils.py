@@ -40,11 +40,7 @@ class RBUtils:
 
         T1 = np.array(T1_list)
 
-        if T2_list is None:
-            T2 = 2 * T1
-        else:
-            T2 = np.array(T2_list)
-
+        T2 = 2 * T1 if T2_list is None else np.array(T2_list)
         if len(T1) != nQ or len(T2) != nQ:
             raise ValueError("T1 and/or T2 not the right length")
 

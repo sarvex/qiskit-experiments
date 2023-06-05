@@ -189,24 +189,23 @@ if os.getenv("EXPERIMENTS_DEV_DOCS", None):
 
 def _get_versions(app, config):
     context = config.html_context
-    start_version = (0, 5, 0)
     current_version = release
     current_version_info = current_version.split(".")
     if current_version_info[0] == "0":
-        version_list = ["0.%s" % x for x in range(start_version[1], int(current_version_info[1]))]
+        start_version = (0, 5, 0)
+        version_list = [
+            f"0.{x}"
+            for x in range(start_version[1], int(current_version_info[1]))
+        ]
     else:
         # TODO: When 1.0.0 add code to handle 0.x version list
         version_list = []
-        pass
     context["version_list"] = version_list
     context["version_label"] = _get_version_label(current_version)
 
 
 def _get_version_label(current_version):
-    if not os.getenv("EXPERIMENTS_DEV_DOCS", None):
-        return release
-    else:
-        return "Development"
+    return "Development" if os.getenv("EXPERIMENTS_DEV_DOCS", None) else release
 
 
 def setup(app):
@@ -222,28 +221,28 @@ from qiskit_experiments.curve_analysis import SeriesDef
 
 
 def maybe_skip_member(app, what, name, obj, skip, options):
-    skip_names = [
-        "analysis",
-        "set_run_options",
-        "data_allocation",
-        "labels",
-        "shots",
-        "x",
-        "y",
-        "y_err",
-        "name",
-        "filter_kwargs",
-        "fit_func",
-        "signature",
-    ]
-    skip_members = [
-        ParameterRepr.repr,
-        ParameterRepr.unit,
-        SeriesDef.plot_color,
-        SeriesDef.plot_symbol,
-        SeriesDef.model_description,
-        SeriesDef.canvas,
-    ]
     if not skip:
+        skip_names = [
+            "analysis",
+            "set_run_options",
+            "data_allocation",
+            "labels",
+            "shots",
+            "x",
+            "y",
+            "y_err",
+            "name",
+            "filter_kwargs",
+            "fit_func",
+            "signature",
+        ]
+        skip_members = [
+            ParameterRepr.repr,
+            ParameterRepr.unit,
+            SeriesDef.plot_color,
+            SeriesDef.plot_symbol,
+            SeriesDef.model_description,
+            SeriesDef.canvas,
+        ]
         return (name in skip_names or obj in skip_members) and what == "attribute"
     return skip

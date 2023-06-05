@@ -102,25 +102,21 @@ class MplDrawer(BaseDrawer):
                     if j != 0:
                         # remove y axis except for most-left plot
                         sub_ax.set_yticklabels([])
-                    else:
-                        # this axis locates at left, write y-label
-                        if self.figure_options.ylabel:
-                            label = self.figure_options.ylabel
-                            if isinstance(label, list):
-                                # Y label can be given as a list for each sub axis
-                                label = label[i]
-                            sub_ax.set_ylabel(label, fontsize=self.style["axis_label_size"])
+                    elif self.figure_options.ylabel:
+                        label = self.figure_options.ylabel
+                        if isinstance(label, list):
+                            # Y label can be given as a list for each sub axis
+                            label = label[i]
+                        sub_ax.set_ylabel(label, fontsize=self.style["axis_label_size"])
                     if i != n_rows - 1:
                         # remove x axis except for most-bottom plot
                         sub_ax.set_xticklabels([])
-                    else:
-                        # this axis locates at bottom, write x-label
-                        if self.figure_options.xlabel:
-                            label = self.figure_options.xlabel
-                            if isinstance(label, list):
-                                # X label can be given as a list for each sub axis
-                                label = label[j]
-                            sub_ax.set_xlabel(label, fontsize=self.style["axis_label_size"])
+                    elif self.figure_options.xlabel:
+                        label = self.figure_options.xlabel
+                        if isinstance(label, list):
+                            # X label can be given as a list for each sub axis
+                            label = label[j]
+                        sub_ax.set_xlabel(label, fontsize=self.style["axis_label_size"])
                     if j == 0 or i == n_rows - 1:
                         # Set label size for outer axes where labels are drawn
                         sub_ax.tick_params(labelsize=self.style["tick_label_size"])
@@ -137,12 +133,7 @@ class MplDrawer(BaseDrawer):
         self._axis = axis
 
     def format_canvas(self):
-        if self._axis.child_axes:
-            # Multi canvas mode
-            all_axes = self._axis.child_axes
-        else:
-            all_axes = [self._axis]
-
+        all_axes = self._axis.child_axes if self._axis.child_axes else [self._axis]
         # Add data labels if there are multiple labels registered per sub_ax.
         for sub_ax in all_axes:
             _, labels = sub_ax.get_legend_handles_labels()
@@ -166,10 +157,7 @@ class MplDrawer(BaseDrawer):
                 v0 = np.nan
                 v1 = np.nan
                 for sub_ax in all_axes:
-                    if ax_type == "x":
-                        this_v0, this_v1 = sub_ax.get_xlim()
-                    else:
-                        this_v0, this_v1 = sub_ax.get_ylim()
+                    this_v0, this_v1 = sub_ax.get_xlim() if ax_type == "x" else sub_ax.get_ylim()
                     v0 = np.nanmin([v0, this_v0])
                     v1 = np.nanmax([v1, this_v1])
                 lim = (v0, v1)
@@ -210,8 +198,7 @@ class MplDrawer(BaseDrawer):
                 if units_str:
                     # Add units to label if both exist
                     label_txt_obj = ax.get_label()
-                    label_str = label_txt_obj.get_text()
-                    if label_str:
+                    if label_str := label_txt_obj.get_text():
                         label_txt_obj.set_text(label_str + units_str)
 
             # Auto-scale all axes to the first sub axis
@@ -220,7 +207,7 @@ class MplDrawer(BaseDrawer):
                 # instead, but this can only be called once per axis. Here we call sharey  on all axes in
                 # a chain, which should have the same effect.
                 if len(all_axes) > 1:
-                    for ax1, ax2 in zip(all_axes[1:], all_axes[0:-1]):
+                    for ax1, ax2 in zip(all_axes[1:], all_axes[:-1]):
                         ax1.sharex(ax2)
                 all_axes[0].set_xlim(lim)
             else:
@@ -228,7 +215,7 @@ class MplDrawer(BaseDrawer):
                 # instead, but this can only be called once per axis. Here we call sharey  on all axes in
                 # a chain, which should have the same effect.
                 if len(all_axes) > 1:
-                    for ax1, ax2 in zip(all_axes[1:], all_axes[0:-1]):
+                    for ax1, ax2 in zip(all_axes[1:], all_axes[:-1]):
                         ax1.sharey(ax2)
                 all_axes[0].set_ylim(lim)
         # Add title
@@ -251,16 +238,15 @@ class MplDrawer(BaseDrawer):
         Raises:
             IndexError: When axis index is specified but no inset axis is found.
         """
-        if index is not None:
-            try:
-                return self._axis.child_axes[index]
-            except IndexError as ex:
-                raise IndexError(
-                    f"Canvas index {index} is out of range. "
-                    f"Only {len(self._axis.child_axes)} subplots are initialized."
-                ) from ex
-        else:
+        if index is None:
             return self._axis
+        try:
+            return self._axis.child_axes[index]
+        except IndexError as ex:
+            raise IndexError(
+                f"Canvas index {index} is out of range. "
+                f"Only {len(self._axis.child_axes)} subplots are initialized."
+            ) from ex
 
     def _get_default_color(self, name: SeriesName) -> Tuple[float, ...]:
         """A helper method to get default color for the series.
@@ -316,9 +302,8 @@ class MplDrawer(BaseDrawer):
             legend: Whether a label entry should be added to ``options``. Used as an
                 easy toggle to disable adding a label entry. Defaults to False.
         """
-        if legend:
-            _label = self.label_for(name, label)
-            if _label:
+        if _label := self.label_for(name, label):
+            if legend:
                 options["label"] = _label
 
     def scatter(
@@ -362,16 +347,12 @@ class MplDrawer(BaseDrawer):
             if x_err is not None and not np.all(np.isfinite(x_err)):
                 x_err = None
 
-            # `errorbar` has extra default draw_options to set, but we want to accept any overrides from
-            # `options`, and thus draw_options.
             errorbar_options = {
                 "linestyle": "",
                 # `markersize` is equivalent to `symbol_size`.
                 "markersize": self.style["symbol_size"],
                 "capsize": self.style["errorbar_capsize"],
-            }
-            errorbar_options.update(draw_options)
-
+            } | draw_options
             self._get_axis(axis).errorbar(
                 x_data, y_data, yerr=y_err, xerr=x_err, **errorbar_options
             )
@@ -548,7 +529,7 @@ class MplDrawer(BaseDrawer):
         axis = series_params.get("canvas", None)
 
         if len(data.shape) == 3:
-            if data.shape[-1] != 3 and data.shape[-1] != 4:
+            if data.shape[-1] not in [3, 4]:
                 raise QiskitError("Image data is three-dimensional but is not RGB/A data.")
 
         # Register extent in ops.

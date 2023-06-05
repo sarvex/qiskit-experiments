@@ -30,7 +30,7 @@ def calibration_circuit(num_qubits: int, state_label: str) -> QuantumCircuit:
     The circuit consists of X-gates on qubits with label bits equal to 1,
     and measurements of all qubits.
     """
-    circ = QuantumCircuit(num_qubits, name="meas_mit_cal_" + state_label)
+    circ = QuantumCircuit(num_qubits, name=f"meas_mit_cal_{state_label}")
     for i, val in enumerate(reversed(state_label)):
         if val == "1":
             circ.x(i)

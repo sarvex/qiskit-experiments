@@ -182,9 +182,7 @@ class BackendData:
             return getattr(self._backend.configuration(), "coupling_map", [])
         elif self._v2:
             coupling_map = self._backend.coupling_map
-            if coupling_map is None:
-                return coupling_map
-            return list(coupling_map.get_edges())
+            return coupling_map if coupling_map is None else list(coupling_map.get_edges())
         return []
 
     @property
@@ -274,6 +272,4 @@ class BackendData:
         """
         if self._v1:
             return self._backend.properties().qubit_property(qubit)["T1"][0]
-        if self._v2:
-            return self._backend.qubit_properties(qubit).t1
-        return float("nan")
+        return self._backend.qubit_properties(qubit).t1 if self._v2 else float("nan")

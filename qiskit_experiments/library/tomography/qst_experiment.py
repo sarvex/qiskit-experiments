@@ -146,8 +146,9 @@ class StateTomography(TomographyExperiment):
         if not self._meas_indices:
             return state
 
-        non_meas_qargs = list(range(len(self._meas_indices), self._circuit.num_qubits))
-        if non_meas_qargs:
+        if non_meas_qargs := list(
+            range(len(self._meas_indices), self._circuit.num_qubits)
+        ):
             # Trace over non-measured qubits
             state = partial_trace(state, non_meas_qargs)
 

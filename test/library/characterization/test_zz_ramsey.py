@@ -45,10 +45,7 @@ class ZZRamseyHelper(MockIQExperimentHelper):
             series = circuit.metadata["series"]
             delay = circuit.metadata["xval"]
 
-            if series == "0":
-                freq = (-1 * self.zz_freq) / 2
-            else:
-                freq = self.zz_freq / 2
+            freq = (-1 * self.zz_freq) / 2 if series == "0" else self.zz_freq / 2
             rz, _, _ = next(i for i in circuit.data if i[0].name == "u1")
             phase = float(rz.params[0])
 

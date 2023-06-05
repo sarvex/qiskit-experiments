@@ -57,7 +57,7 @@ class BaseAnalysis(ABC, StoreInitArgs):
         args = tuple(getattr(self, "__init_args__", OrderedDict()).values())
         kwargs = dict(getattr(self, "__init_kwargs__", OrderedDict()))
         # Only store non-default valued options
-        options = dict((key, getattr(self._options, key)) for key in self._set_options)
+        options = {key: getattr(self._options, key) for key in self._set_options}
         return AnalysisConfig(
             cls=type(self),
             args=args,
@@ -186,14 +186,11 @@ class BaseAnalysis(ABC, StoreInitArgs):
 
     def _get_experiment_components(self, experiment_data: ExperimentData):
         """Subclasses may override this method to specify the experiment components."""
-        if "physical_qubits" in experiment_data.metadata:
-            experiment_components = [
-                Qubit(qubit) for qubit in experiment_data.metadata["physical_qubits"]
-            ]
-        else:
-            experiment_components = []
-
-        return experiment_components
+        return (
+            [Qubit(qubit) for qubit in experiment_data.metadata["physical_qubits"]]
+            if "physical_qubits" in experiment_data.metadata
+            else []
+        )
 
     def _format_analysis_result(self, data, experiment_id, experiment_components=None):
         """Format run analysis result to DbAnalysisResult"""

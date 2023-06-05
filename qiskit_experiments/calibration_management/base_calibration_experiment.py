@@ -243,7 +243,7 @@ class BaseCalibrationExperiment(BaseExperiment, ABC):
             CalibrationError: If a physical qubit is not contained in the channels schedule.
         """
         for qubit in physical_qubits:
-            if qubit not in set(ch.index for ch in schedule.channels):
+            if qubit not in {ch.index for ch in schedule.channels}:
                 raise CalibrationError(
                     f"Schedule {schedule.name} does not contain a channel "
                     f"for the physical qubit {qubit}."

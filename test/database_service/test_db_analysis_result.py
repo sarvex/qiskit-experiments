@@ -210,7 +210,7 @@ class TestAnalysisResult(QiskitExperimentsTestCase):
                 f"Value of type {value_type.__name__}.",
             )
         self.assertEqual(original_result.tags, copied_result.tags)
-        for key, _ in attrs.items():
+        for key in attrs:
             if key in attrs_should_differ:
                 # experiment_id must be different
                 self.assertNotEqual(
@@ -230,8 +230,7 @@ class TestAnalysisResult(QiskitExperimentsTestCase):
             "value": {"foo": "bar"},
             "device_components": ["Q1", "Q2"],
             "experiment_id": "1234",
-        }
-        values.update(kwargs)
+        } | kwargs
         return AnalysisResult(**values)
 
 

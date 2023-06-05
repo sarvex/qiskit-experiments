@@ -548,9 +548,7 @@ class TestProcessTomography(QiskitExperimentsTestCase):
             targets = [2 * i.expand(mix) for i in [proj0, proj1]]
         elif circuit_clbits == [1]:
             targets = [2 * i.tensor(mix) for i in [proj0, proj1]]
-        elif circuit_clbits == [0, 1]:
-            targets = [4 * i.expand(j) for j in [proj0, proj1] for i in [proj0, proj1]]
-        elif circuit_clbits == [1, 0]:
+        elif circuit_clbits in [[0, 1], [1, 0]]:
             targets = [4 * i.expand(j) for j in [proj0, proj1] for i in [proj0, proj1]]
         num_cond = len(circuit_clbits)
         prob_target = 0.5**num_cond

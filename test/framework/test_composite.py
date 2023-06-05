@@ -479,23 +479,23 @@ class TestCompositeExperimentData(QiskitExperimentsTestCase):
             },
         ]
 
+
+
         class Backend(FakeBackend):
             """
             Backend to be used in test_composite_subexp_data
             """
 
             def run(self, run_input, **options):
-                results = []
-                for circ, cnt in zip(run_input, counts):
-                    results.append(
-                        {
-                            "shots": -1,
-                            "success": True,
-                            "header": {"metadata": circ.metadata},
-                            "data": {"counts": cnt},
-                        }
-                    )
-
+                results = [
+                    {
+                        "shots": -1,
+                        "success": True,
+                        "header": {"metadata": circ.metadata},
+                        "data": {"counts": cnt},
+                    }
+                    for circ, cnt in zip(run_input, counts)
+                ]
                 res = {
                     "backend_name": "backend",
                     "backend_version": "0",
@@ -505,6 +505,7 @@ class TestCompositeExperimentData(QiskitExperimentsTestCase):
                     "results": results,
                 }
                 return FakeJob(backend=self, result=Result.from_dict(res))
+
 
         class Experiment(FakeExperiment):
             """
@@ -847,7 +848,7 @@ class TestBatchTranspileOptions(QiskitExperimentsTestCase):
         """
         circs = self.batch2._transpiled_circuits()
         numbers_of_gates = [len(circ.data) for circ in circs]
-        self.assertEqual(set(numbers_of_gates), set([7, 8, 9]))
+        self.assertEqual(set(numbers_of_gates), {7, 8, 9})
 
     def test_batch_transpile_options_integrated(self):
         """

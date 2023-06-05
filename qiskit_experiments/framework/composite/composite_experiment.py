@@ -104,9 +104,7 @@ class CompositeExperiment(BaseExperiment):
         Returns:
             BaseExperiment: The component experiment(s).
         """
-        if index is None:
-            return self._experiments
-        return self._experiments[index]
+        return self._experiments if index is None else self._experiments[index]
 
     @property
     def analysis(self) -> Union[CompositeAnalysis, None]:

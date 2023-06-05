@@ -106,10 +106,7 @@ def deprecated_class(
         @functools.wraps(cls.__init__, assigned=("__annotations__",))
         def new(deprecated_cls, *args, **kwargs):
             message = f"Class '{deprecated_cls.__name__}' has been deprecated"
-            if new_cls:
-                message += f" and replaced with '{new_cls.__name__}'. "
-            else:
-                message += ". "
+            message += f" and replaced with '{new_cls.__name__}'. " if new_cls else ". "
             if last_version:
                 message += f"This class will be removed after Qiskit Experiments {last_version}. "
             else:
@@ -159,7 +156,7 @@ def deprecate_arguments(
         def wrapper(*args, **kwargs):
             if kwargs:
                 _rename_kwargs(
-                    args[0].__class__.__name__ + "." + func.__name__,
+                    f"{args[0].__class__.__name__}.{func.__name__}",
                     kwargs,
                     kwarg_map,
                     last_version,
@@ -203,7 +200,7 @@ def qubit_deprecate() -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             category = DeprecationWarning
-            func_name = args[0].__class__.__name__ + ".__init__"
+            func_name = f"{args[0].__class__.__name__}.__init__"
 
             if len(args) > 1 and isinstance(args[1], int):
                 args = list(args)

@@ -52,8 +52,7 @@ class BaseUpdater(ABC):
     @staticmethod
     def _time_stamp(exp_data: ExperimentData) -> datetime:
         """Helper method to extract the datetime."""
-        all_times = exp_data.completion_times.values()
-        if all_times:
+        if all_times := exp_data.completion_times.values():
             return max(all_times).astimezone()
         return datetime.now(timezone.utc).astimezone()
 

@@ -302,9 +302,10 @@ def _dual_povms(basis: MeasurementBasis, qubit: int) -> List[List[np.ndarray]]:
     # Concatenate all POVM effects to treat as states for linear inversion
     states = []
     for index in range(size):
-        for outcome in range(num_outcomes):
-            states.append(basis.matrix((index,), outcome, (qubit,)))
-
+        states.extend(
+            basis.matrix((index,), outcome, (qubit,))
+            for outcome in range(num_outcomes)
+        )
     dual_basis = _construct_dual_states(states)
 
     # Organize back into nested lists of dual POVM effects
@@ -331,5 +332,4 @@ def _construct_dual_states(states: Sequence[np.ndarray]):
         ) from ex
 
     vec_dual = np.tensordot(inv_mat, vec_basis, axes=([1], [1])).T
-    dual_mats = np.reshape(vec_dual, (size, dim1, dim2)).round(15)
-    return dual_mats
+    return np.reshape(vec_dual, (size, dim1, dim2)).round(15)

@@ -95,9 +95,9 @@ class MultiStateDiscriminationAnalysis(BaseAnalysis):
         # Process the data and get labels
         data, fit_state = [], []
         for i in range(n_states):
-            state_data = []
-            for j in range(num_shots):
-                state_data.append(experiment_data.data()[i]["memory"][j][0])
+            state_data = [
+                experiment_data.data()[i]["memory"][j][0] for j in range(num_shots)
+            ]
             data.append(np.array(state_data))
             fit_state.append(experiment_data.data()[i]["metadata"]["label"])
 
@@ -149,13 +149,10 @@ class MultiStateDiscriminationAnalysis(BaseAnalysis):
         Returns:
             The plotted IQ data.
         """
-        # create figure labels
-        params_dict = {}
-        for state in fit_state:
-            params_dict[state] = {"label": f"$|{state}\\rangle$"}
+        params_dict = {state: {"label": f"$|{state}\\rangle$"} for state in fit_state}
         # Update params_dict to contain any existing series_params values,
         # where they have priority over params_dict.
-        params_dict.update(self.plotter.figure_options.series_params)
+        params_dict |= self.plotter.figure_options.series_params
         self.plotter.set_figure_options(series_params=params_dict)
 
         # calculate centroids

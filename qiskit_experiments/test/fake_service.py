@@ -278,7 +278,7 @@ class FakeService:
         if (
             len(sortby_split) != 2
             or sortby_split[0] != "start_datetime"
-            or (sortby_split[1] != "asc" and sortby_split[1] != "desc")
+            or sortby_split[1] not in ["asc", "desc"]
         ):
             raise ValueError(
                 "The fake service currently supports only sorting by start_datetime, which can be "
@@ -467,7 +467,7 @@ class FakeService:
         if (
             len(sortby_split) != 2
             or sortby_split[0] != "creation_datetime"
-            or (sortby_split[1] != "asc" and sortby_split[1] != "desc")
+            or sortby_split[1] not in ["asc", "desc"]
         ):
             raise ValueError(
                 "The fake service currently supports only sorting by creation_datetime, "

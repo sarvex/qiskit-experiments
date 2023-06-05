@@ -62,10 +62,7 @@ class T1Analysis(curve.DecayAnalysis):
             curve.utils.is_error_not_significant(base, absolute=0.1),
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"
 
 
 class T1KerneledAnalysis(curve.DecayAnalysis):
@@ -109,10 +106,7 @@ class T1KerneledAnalysis(curve.DecayAnalysis):
             curve.utils.is_error_not_significant(base, absolute=0.1),
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"
 
     def _format_data(
         self,

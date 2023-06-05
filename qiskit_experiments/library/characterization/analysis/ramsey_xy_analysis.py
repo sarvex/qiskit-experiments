@@ -202,7 +202,4 @@ class RamseyXYAnalysis(curve.CurveAnalysis):
             curve.utils.is_error_not_significant(fit_freq),
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"

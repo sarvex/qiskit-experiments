@@ -209,8 +209,7 @@ class InterleavedRB(StandardRB):
         for seq in reference_sequences:
             new_seq = []
             for elem in seq:
-                new_seq.append(elem)
-                new_seq.append(self._interleaved_cliff)
+                new_seq.extend((elem, self._interleaved_cliff))
             interleaved_sequences.append(new_seq)
         interleaved_circuits = self._sequences_to_circuits(interleaved_sequences)
         for circ, seq in zip(interleaved_circuits, reference_sequences):

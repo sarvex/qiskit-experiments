@@ -154,7 +154,4 @@ class ResonanceAnalysis(curve.CurveAnalysis):
             snr > 2,
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"

@@ -197,8 +197,8 @@ class TestLocalBasis(QiskitExperimentsTestCase):
 
         # Check states
         indices = it.product(range(size), repeat=2)
-        states0 = qubit_states[qubits[0]] if qubits[0] in qubit_states else default_states
-        states1 = qubit_states[qubits[1]] if qubits[1] in qubit_states else default_states
+        states0 = qubit_states.get(qubits[0], default_states)
+        states1 = qubit_states.get(qubits[1], default_states)
         for index in indices:
             basis_state = qi.DensityMatrix(basis.matrix(index, qubits))
             target = qi.DensityMatrix(states0[index[0]]).expand(states1[index[1]])
@@ -337,8 +337,8 @@ class TestLocalBasis(QiskitExperimentsTestCase):
         )
 
         # Check states
-        states0 = qubit_povms[qubits[0]] if qubits[0] in qubit_povms else default_povms
-        states1 = qubit_povms[qubits[1]] if qubits[1] in qubit_povms else default_povms
+        states0 = qubit_povms.get(qubits[0], default_povms)
+        states1 = qubit_povms.get(qubits[1], default_povms)
         indices = it.product(range(size), repeat=2)
         outcomes = it.product(range(outcomes), repeat=len(qubits))
         for index in indices:

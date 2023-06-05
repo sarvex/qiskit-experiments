@@ -198,11 +198,7 @@ def cvxpy_linear_lstsq(
             cond_mask = np.all(cond_meas_data == cond_meas_idx, axis=1) & np.all(
                 cond_prep_data == cond_prep_idx, axis=1
             )
-            if weights is None:
-                cond_weights = None
-            else:
-                cond_weights = weights[:, cond_mask]
-
+            cond_weights = None if weights is None else weights[:, cond_mask]
             basis_matrix, probability_data, probability_weights = lstsq_utils.lstsq_data(
                 outcome_data[:, cond_mask],
                 shot_data[cond_mask],
@@ -344,9 +340,7 @@ def cvxpy_linear_lstsq(
     t_stop = time.time()
     metadata["fitter_time"] = t_stop - t_start
 
-    if len(fits) == 1:
-        return fits[0], metadata
-    return fits, metadata
+    return (fits[0], metadata) if len(fits) == 1 else (fits, metadata)
 
 
 @cvxpy_utils.requires_cvxpy

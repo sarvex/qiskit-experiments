@@ -255,13 +255,13 @@ class CliffordUtils:
             qc.h(0)
         if j == 1:
             qc.sxdg(0)
-        if j == 2:
+        elif j == 2:
             qc.s(0)
         if p == 1:
             qc.x(0)
-        if p == 2:
+        elif p == 2:
             qc.y(0)
-        if p == 3:
+        elif p == 3:
             qc.z(0)
 
         if basis_gates:
@@ -573,8 +573,11 @@ def _transformed_clifford_layer(
 
 def _num_from_layer_indices(triplet: Tuple[Integral, Integral, Integral]) -> Integral:
     """Return the clifford number corresponding to the input triplet."""
-    num = triplet[0] * _NUM_LAYER_1 * _NUM_LAYER_2 + triplet[1] * _NUM_LAYER_2 + triplet[2]
-    return num
+    return (
+        triplet[0] * _NUM_LAYER_1 * _NUM_LAYER_2
+        + triplet[1] * _NUM_LAYER_2
+        + triplet[2]
+    )
 
 
 def _layer_indices_from_num(num: Integral) -> Tuple[Integral, Integral, Integral]:

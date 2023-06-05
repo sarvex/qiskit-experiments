@@ -1635,7 +1635,7 @@ class TestSavingAndLoading(CrossResonanceTest):
 
         # Load the parameters, check value and type.
         with self.assertWarns(DeprecationWarning):
-            self.cals.load_parameter_values(self._prefix + "parameter_values.csv")
+            self.cals.load_parameter_values(f"{self._prefix}parameter_values.csv")
 
         val = self.cals.get_parameter_value("amp", (3,), "xp")
         self.assertEqual(val, 0.1 + 0.01j)
@@ -1668,7 +1668,7 @@ class TestSavingAndLoading(CrossResonanceTest):
             self.cals.save("csv", overwrite=True, file_prefix=self._prefix)
         self.cals._params = defaultdict(list)
         with self.assertWarns(DeprecationWarning):
-            self.cals.load_parameter_values(self._prefix + "parameter_values.csv")
+            self.cals.load_parameter_values(f"{self._prefix}parameter_values.csv")
 
     def test_save_load_library(self):
         """Test that we can load and save a library.
@@ -1687,7 +1687,7 @@ class TestSavingAndLoading(CrossResonanceTest):
             cals.save(file_type="csv", overwrite=True, file_prefix=self._prefix)
 
         with self.assertWarns(DeprecationWarning):
-            cals.load_parameter_values(self._prefix + "parameter_values.csv")
+            cals.load_parameter_values(f"{self._prefix}parameter_values.csv")
 
         # Test the value of a few loaded params.
         self.assertEqual(cals.get_parameter_value("amp", (0,), "x"), 0.5)
@@ -1704,7 +1704,7 @@ class TestSavingAndLoading(CrossResonanceTest):
         even though calibrations is instantiated outside built-in library.
         """
         self.cals.save(file_type="json", overwrite="True", file_prefix=self._prefix)
-        loaded = self.cals.load(file_path=self._prefix + ".json")
+        loaded = self.cals.load(file_path=f"{self._prefix}.json")
         self.assertEqual(self.cals, loaded)
 
         original_sched = self.cals.get_schedule("cr", (3, 2))
@@ -1759,7 +1759,7 @@ class TestInstructionScheduleMap(QiskitExperimentsTestCase):
 
         # based on coupling map of Belem to keep the test robust.
         expected_pairs = [(0, 1), (1, 0), (1, 2), (2, 1), (1, 3), (3, 1), (3, 4), (4, 3)]
-        coupling_map = set(tuple(pair) for pair in BackendData(backend).coupling_map)
+        coupling_map = {tuple(pair) for pair in BackendData(backend).coupling_map}
 
         for pair in expected_pairs:
             self.assertTrue(pair in coupling_map)
@@ -1919,10 +1919,10 @@ class TestInstructionScheduleMap(QiskitExperimentsTestCase):
         library = FixedFrequencyTransmon(basis_gates=["sx", "x"])
 
         backend_data = BackendData(backend)
-        control_channel_map = {}
-        for qargs in backend_data.coupling_map:
-            control_channel_map[tuple(qargs)] = backend_data.control_channel(qargs)
-
+        control_channel_map = {
+            tuple(qargs): backend_data.control_channel(qargs)
+            for qargs in backend_data.coupling_map
+        }
         cals1 = Calibrations.from_backend(backend, libraries=[library])
         cals2 = Calibrations(
             libraries=[library],

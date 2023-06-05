@@ -95,8 +95,7 @@ def process_default_options(
             section_repr=section_repr,
             target_args=target_args,
         )
-        for line in parsed_lines:
-            descriptions.append(indent + line)
+        descriptions.extend(indent + line for line in parsed_lines)
         for added_arg in added_args:
             desc_sources[added_arg] = ".".join([mro_class.__module__, mro_class.__name__])
             target_args.remove(added_arg)
@@ -156,7 +155,7 @@ def _flatten_option_docs(
     for line in docstring_lines[line_ind:]:
         if line[indent:].startswith(" "):
             # Remove linefeed and turn multi-line description into single-line
-            tmp += " " + line.lstrip()
+            tmp += f" {line.lstrip()}"
         else:
             if tmp:
                 matched = _parameter_doc_regex.match(tmp)

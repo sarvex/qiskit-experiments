@@ -62,7 +62,7 @@ class SkLDA(BaseDiscriminator):
 
     def is_trained(self) -> bool:
         """Return True if the discriminator has been trained on data."""
-        return not getattr(self._lda, "classes_", None) is None
+        return getattr(self._lda, "classes_", None) is not None
 
     def predict(self, data: List):
         """Wrap the predict method of the LDA."""
@@ -137,7 +137,7 @@ class SkQDA(BaseDiscriminator):
 
     def is_trained(self) -> bool:
         """Return True if the discriminator has been trained on data."""
-        return not getattr(self._qda, "classes_", None) is None
+        return getattr(self._qda, "classes_", None) is not None
 
     def predict(self, data: List):
         """Wrap the predict method of the QDA."""

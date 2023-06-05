@@ -658,11 +658,7 @@ class TestFitOptions(QiskitExperimentsTestCase):
         opt2 = FitOptions(["par0", "par1"], default_p0=[0, 1])
         opt3 = FitOptions(["par0", "par1"], default_p0=[0, 2])
 
-        opts = set()
-        opts.add(opt1)
-        opts.add(opt2)
-        opts.add(opt3)
-
+        opts = {opt1, opt2, opt3}
         self.assertEqual(len(opts), 2)
 
     def test_detect_invalid_p0(self):

@@ -134,10 +134,7 @@ class IQPlotter(BasePlotter):
         if self.figure_options.ylim:
             ext_calc.register_data(self.figure_options.ylim, dim=1)
             has_registered_data = True
-        if has_registered_data:
-            return ext_calc.extent()
-        else:
-            return None
+        return ext_calc.extent() if has_registered_data else None
 
     def _compute_discriminator_image(
         self,

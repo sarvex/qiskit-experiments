@@ -52,12 +52,12 @@ class ReadoutAngleAnalysis(BaseAnalysis):
         if (np.abs(angles[0] - angles[1])) % (2 * np.pi) > np.pi:
             angle += np.pi
 
-        extra_results = {}
-        extra_results["readout_angle_0"] = angles[0]
-        extra_results["readout_angle_1"] = angles[1]
-        extra_results["readout_radius_0"] = radii[0]
-        extra_results["readout_radius_1"] = radii[1]
-
+        extra_results = {
+            "readout_angle_0": angles[0],
+            "readout_angle_1": angles[1],
+            "readout_radius_0": radii[0],
+            "readout_radius_1": radii[1],
+        }
         analysis_results = [
             AnalysisResultData(name="readout_angle", value=angle, extra=extra_results)
         ]

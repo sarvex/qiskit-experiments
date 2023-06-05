@@ -77,7 +77,7 @@ def _generate_analysis_ref(
                 pass
 
     if analysis_ref_start is None:
-        raise Exception(f"Option docstring for analysis_ref is missing.")
+        raise Exception("Option docstring for analysis_ref is missing.")
 
     analysis_ref_lines = []
     for line in lines[analysis_ref_start + 1:]:
@@ -110,17 +110,19 @@ def _get_superclass(current_class: Type, base_class: Type = None):
     doc_classes = []
     mro_classes = inspect.getmro(current_class)[1:]
     if base_class:
-        for mro_class in mro_classes:
-            if issubclass(mro_class, base_class) and mro_class is not base_class:
-                doc_classes.append(mro_class)
+        doc_classes.extend(
+            mro_class
+            for mro_class in mro_classes
+            if issubclass(mro_class, base_class)
+            and mro_class is not base_class
+        )
     else:
         doc_classes.extend(mro_classes)
 
-    lines = []
-    for doc_class in doc_classes:
-        lines.append(f"* Superclass :class:`{doc_class.__module__}.{doc_class.__name__}`")
-
-    return lines
+    return [
+        f"* Superclass :class:`{doc_class.__module__}.{doc_class.__name__}`"
+        for doc_class in doc_classes
+    ]
 
 
 def _write_options(lines, indent) -> Iterator:
@@ -162,14 +164,14 @@ def _write_options(lines, indent) -> Iterator:
     else:
         yield "Options"
         for source, data in params.items():
-            yield indent + f"* Defined in the class {source}:"
+            yield f"{indent}* Defined in the class {source}:"
             yield ""
             for name, info in data.items():
                 _type = info.get("type", "n/a")
                 _default = info.get("default_val", "n/a")
                 _desc = info.get("param", "n/a")
-                yield indent + f"  * **{name}** ({_type})"
+                yield f"{indent}  * **{name}** ({_type})"
                 yield ""
-                yield indent + f"    | Default value: {_default}"
-                yield indent + f"    | {_desc}"
+                yield f"{indent}    | Default value: {_default}"
+                yield f"{indent}    | {_desc}"
                 yield ""

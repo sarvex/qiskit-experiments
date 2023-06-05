@@ -202,9 +202,7 @@ class ZZRamsey(BaseExperiment):
             based on the current experiment options.
         """
         delays = self.delays()
-        freq = self.experiment_options.num_rotations / (max(delays) - min(delays))
-
-        return freq
+        return self.experiment_options.num_rotations / (max(delays) - min(delays))
 
     def _template_circuits(
         self,
@@ -239,11 +237,7 @@ class ZZRamsey(BaseExperiment):
         # units of seconds. Otherwise they will be in units of samples. For the
         # samples case, we multiply by `dt` so that `delay_freq` is in inverse
         # samples per cycle.
-        if timing.delay_unit != "s":
-            delay_freq = timing.dt * frequency
-        else:
-            delay_freq = frequency
-
+        delay_freq = timing.dt * frequency if timing.delay_unit != "s" else frequency
         # Template circuit for series 0
         # Control qubit starting in |0> state, flipping to |1> in middle
         circ0 = QuantumCircuit(2, 1, metadata=metadata.copy())
@@ -319,9 +313,7 @@ class ZZRamsey(BaseExperiment):
         if timing.dt is not None:
             freq = freq / timing.dt
 
-        circs = self._template_circuits(frequency=freq)
-
-        return circs
+        return self._template_circuits(frequency=freq)
 
     def circuits(self) -> List[QuantumCircuit]:
         """Create circuits

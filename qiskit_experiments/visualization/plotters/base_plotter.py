@@ -537,10 +537,11 @@ class BasePlotter(ABC):
 
     def config(self) -> Dict:
         """Return the config dictionary for this drawing."""
-        options = dict((key, getattr(self._options, key)) for key in self._set_options)
-        figure_options = dict(
-            (key, getattr(self._figure_options, key)) for key in self._set_figure_options
-        )
+        options = {key: getattr(self._options, key) for key in self._set_options}
+        figure_options = {
+            key: getattr(self._figure_options, key)
+            for key in self._set_figure_options
+        }
         drawer = self.drawer.__json_encode__()
 
         return {

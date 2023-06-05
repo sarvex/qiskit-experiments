@@ -100,9 +100,8 @@ class T1(BaseExperiment):
                 "experiment_type": self._type,
                 "qubit": self.physical_qubits[0],
                 "unit": "s",
+                "xval": timing.delay_time(time=delay),
             }
-            circ.metadata["xval"] = timing.delay_time(time=delay)
-
             circuits.append(circ)
 
         return circuits

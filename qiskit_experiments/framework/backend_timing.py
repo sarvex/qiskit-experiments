@@ -228,10 +228,7 @@ class BackendTiming:
         "dt" is used if dt is present in the backend configuration. Otherwise
         "s" is used.
         """
-        if self.dt is not None:
-            return "dt"
-
-        return "s"
+        return "dt" if self.dt is not None else "s"
 
     def round_delay(
         self, *, time: Optional[float] = None, samples: Optional[Union[int, float]] = None
@@ -279,9 +276,7 @@ class BackendTiming:
 
         granularity = lcm(self._pulse_alignment, self._acquire_alignment)
 
-        samples_out = int(round(samples / granularity) * granularity)
-
-        return samples_out
+        return int(round(samples / granularity) * granularity)
 
     def round_pulse(
         self, *, time: Optional[float] = None, samples: Optional[Union[int, float]] = None

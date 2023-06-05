@@ -183,11 +183,7 @@ class BlochTrajectoryAnalysis(curve.CurveAnalysis):
                 continue
             fft_freq = curve.guess.frequency(data.x, data.y)
             omega_xyz.append(fft_freq)
-        if omega_xyz:
-            omega = 2 * np.pi * np.average(omega_xyz)
-        else:
-            omega = 1e-3
-
+        omega = 2 * np.pi * np.average(omega_xyz) if omega_xyz else 1e-3
         zmin, zmax = np.percentile(z_data.y, [10, 90])
         theta = np.arccos(np.sqrt((zmax - zmin) / 2))
 

@@ -168,8 +168,8 @@ class ZZRamseyAnalysis(CurveAnalysis):
         ]
 
         def rough_sinusoidal_decay_constant(
-            x_data: np.ndarray, y_data: np.ndarray, bounds: Tuple[float, float]
-        ) -> float:
+                x_data: np.ndarray, y_data: np.ndarray, bounds: Tuple[float, float]
+            ) -> float:
             """Estimate the decay constant of y_data vs x_data
 
             This function assumes the data is roughly evenly spaced and that
@@ -197,13 +197,7 @@ class ZZRamseyAnalysis(CurveAnalysis):
             # Now solve y_left = exp(-x_left / tau) and
             # y_right = exp(-x_right / tau) for tau
             denom = np.log(y_right / y_left)
-            if denom < 0:
-                tau = (x_left - x_right) / denom
-            else:
-                # If amplitude is constant or growing from left to right, bound
-                # to the maximum allowed tau
-                tau = bounds[1]
-
+            tau = (x_left - x_right) / denom if denom < 0 else bounds[1]
             return max(min(tau, bounds[1]), bounds[0])
 
         user_opt.p0.set_if_empty(
@@ -244,7 +238,4 @@ class ZZRamseyAnalysis(CurveAnalysis):
             is_error_not_significant(zz, absolute=0.2 * rough_freq_magnitude),
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"

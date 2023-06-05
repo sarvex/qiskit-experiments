@@ -40,13 +40,9 @@ class TestFakeService(QiskitExperimentsTestCase):
                         "experiment_id": str(expid),
                         "experiment_type": str(experiment_type),
                         "backend_name": str(backend_name),
-                        "tags": ["a" + str(tags), "b" + str(tags)],
+                        "tags": [f"a{str(tags)}", f"b{str(tags)}"],
+                        "parent_id": str(expid % 3) if expid > 2 else None,
                     }
-
-                    if expid > 2:
-                        expentry["parent_id"] = str(expid % 3)
-                    else:
-                        expentry["parent_id"] = None
 
                     # Create the experiment in the service
                     self.service.create_experiment(**expentry)
@@ -60,11 +56,7 @@ class TestFakeService(QiskitExperimentsTestCase):
                     # components [0], an d some have device components [1].
                     # This means that each of these experiments should eventually have
                     # device components [0, 1].
-                    if expid in [0, 1, 6, 7]:
-                        expentry["device_components"] = [0, 1]
-                    else:
-                        expentry["device_components"] = []
-
+                    expentry["device_components"] = [0, 1] if expid in [0, 1, 6, 7] else []
                     # The service determines the time (see documentation in
                     # FakeService.create_experiment).
                     expentry["start_datetime"] = datetime(2022, 1, 1, expid)
@@ -93,7 +85,7 @@ class TestFakeService(QiskitExperimentsTestCase):
                         "experiment_id": str(experiment_id),
                         "result_type": str(result_type),
                         "result_id": str(resid),
-                        "tags": ["a" + str(tags), "b" + str(tags)],
+                        "tags": [f"a{str(tags)}", f"b{str(tags)}"],
                         "quality": quality,
                         "verified": verified,
                         "result_data": {"value": result_data},

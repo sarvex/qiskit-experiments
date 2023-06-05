@@ -127,10 +127,7 @@ class LocalPreparationBasis(PreparationBasis):
 
     def matrix(self, index: Sequence[int], qubits: Optional[Sequence[int]] = None):
         # Convert args to hashable tuples
-        if qubits is None:
-            qubits = tuple(range(len(index)))
-        else:
-            qubits = tuple(qubits)
+        qubits = tuple(range(len(index))) if qubits is None else tuple(qubits)
         index = tuple(index)
 
         try:
@@ -365,16 +362,11 @@ class LocalMeasurementBasis(MeasurementBasis):
 
     def matrix(self, index: Sequence[int], outcome: int, qubits: Optional[Sequence[int]] = None):
         # Convert args to hashable tuples
-        if qubits is None:
-            qubits = tuple(range(len(index)))
-        else:
-            qubits = tuple(qubits)
+        qubits = tuple(range(len(index))) if qubits is None else tuple(qubits)
         index = tuple(index)
 
         try:
-            # Look for custom POVM for specified qubits
-            qubit_povm = self._generate_qubits_povm(index, qubits)
-            if qubit_povm:
+            if qubit_povm := self._generate_qubits_povm(index, qubits):
                 return qubit_povm[outcome].data
 
             # Otherwise construct tensor product POVM
@@ -717,10 +709,7 @@ def _format_qubit_states(
     # Format POVM keys to be a tuple of (qubits, basis)
     formatted_states = {}
     for qubits, states in qubit_states.items():
-        if isinstance(qubits, int):
-            qubits = (qubits,)
-        else:
-            qubits = tuple(qubits)
+        qubits = (qubits, ) if isinstance(qubits, int) else tuple(qubits)
         init_key = len(qubits) * (0,)
         formatted_states[qubits] = _format_states(states, init_key)
 

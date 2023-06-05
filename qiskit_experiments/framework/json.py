@@ -58,7 +58,7 @@ def get_module_version(mod_name: str) -> str:
 
     # Return qiskit experiments version for classes in this
     # module or defined in main
-    if mod_name in ["qiskit_experiments", "__main__"]:
+    if mod_name in {"qiskit_experiments", "__main__"}:
         return __version__
 
     # For other classes attempt to use their module version
@@ -213,15 +213,14 @@ def _serialize_safe_float(obj: any):
     if isinstance(obj, float):
         if math.isfinite(obj):
             return obj
-        else:
-            value = obj
-            if math.isnan(obj):
-                value = "NaN"
-            elif obj == math.inf:
-                value = "Infinity"
-            elif obj == -math.inf:
-                value = "-Infinity"
-            return {"__type__": "safe_float", "__value__": value}
+        value = obj
+        if math.isnan(value):
+            value = "NaN"
+        elif value == math.inf:
+            value = "Infinity"
+        elif value == -math.inf:
+            value = "-Infinity"
+        return {"__type__": "safe_float", "__value__": value}
     elif isinstance(obj, (list, tuple)):
         return [_serialize_safe_float(i) for i in obj]
     elif isinstance(obj, dict):
@@ -594,8 +593,7 @@ class ExperimentDecoder(json.JSONDecoder):
                 return datetime.fromisoformat(obj_val)
             if obj_type == "LMFIT.Model":
                 tmp = lmfit.Model(func=None)
-                load_obj = tmp.loads(s=obj_val)
-                return load_obj
+                return tmp.loads(s=obj_val)
             if obj_type == "Instruction":
                 circuit = _decode_and_deserialize(obj_val, qpy.load, name="QuantumCircuit")[0]
                 return circuit.data[0][0]

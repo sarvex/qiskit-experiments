@@ -230,8 +230,4 @@ class TestFixedFrequencyTransmon(QiskitExperimentsTestCase):
         if len(set(lib1.basis_gates)) != len(set(lib2.basis_gates)):
             return False
 
-        for gate in lib1.basis_gates:
-            if str(lib1[gate]) != str(lib2[gate]):
-                return False
-
-        return True
+        return all(str(lib1[gate]) == str(lib2[gate]) for gate in lib1.basis_gates)

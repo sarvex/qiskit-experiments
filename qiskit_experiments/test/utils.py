@@ -27,10 +27,7 @@ class FakeJob(Job):
 
     def __init__(self, backend: Backend, result: Optional[Result] = None):
         """Initialize FakeJob."""
-        if result:
-            job_id = result.job_id
-        else:
-            job_id = uuid.uuid4().hex
+        job_id = result.job_id if result else uuid.uuid4().hex
         super().__init__(backend, job_id)
         self._result = result
 
@@ -49,6 +46,4 @@ class FakeJob(Job):
 
     def status(self) -> JobStatus:
         """Return the status of the job, among the values of ``JobStatus``."""
-        if self._result:
-            return JobStatus.DONE
-        return JobStatus.RUNNING
+        return JobStatus.DONE if self._result else JobStatus.RUNNING

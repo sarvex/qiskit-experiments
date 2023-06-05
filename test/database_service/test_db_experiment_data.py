@@ -240,9 +240,7 @@ class TestDbExperimentData(QiskitExperimentsTestCase):
 
     def test_get_data(self):
         """Test getting data."""
-        data1 = []
-        for _ in range(5):
-            data1.append({"counts": {"00": randrange(1024)}})
+        data1 = [{"counts": {"00": randrange(1024)}} for _ in range(5)]
         results = self._get_job_result(3)
 
         exp_data = ExperimentData(experiment_type="qiskit_test")
@@ -787,9 +785,7 @@ class TestDbExperimentData(QiskitExperimentsTestCase):
             event.wait(timeout=15)
 
         def _status():
-            if event.is_set():
-                return JobStatus.CANCELLED
-            return JobStatus.RUNNING
+            return JobStatus.CANCELLED if event.is_set() else JobStatus.RUNNING
 
         job = mock.create_autospec(Job, instance=True)
         job.job_id.return_value = "1234"

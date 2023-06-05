@@ -213,10 +213,7 @@ class TestT1(QiskitExperimentsTestCase):
         res = par_exp.run(backend=backend, seed_simulator=4)
         self.assertExperimentDone(res)
 
-        sub_res = []
-        for i in range(2):
-            sub_res.append(res.child_data(i).analysis_results("T1"))
-
+        sub_res = [res.child_data(i).analysis_results("T1") for i in range(2)]
         self.assertEqual(sub_res[0].quality, "good")
         self.assertAlmostEqual(sub_res[0].value.n, t1[0], delta=3)
         self.assertEqual(sub_res[1].quality, "bad")

@@ -160,11 +160,7 @@ class T2HahnBackend(BackendV2):
     ) -> Job:
         passes = []
 
-        if isinstance(run_input, QuantumCircuit):
-            circuits = [run_input]
-        else:
-            circuits = run_input
-
+        circuits = [run_input] if isinstance(run_input, QuantumCircuit) else run_input
         for circuit in circuits:
             if circuit.num_qubits > self.num_qubits:
                 raise QiskitError(

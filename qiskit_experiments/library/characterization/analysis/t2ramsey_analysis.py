@@ -57,7 +57,4 @@ class T2RamseyAnalysis(curve.DampedOscillationAnalysis):
             curve.utils.is_error_not_significant(freq, fraction=0.1),
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"

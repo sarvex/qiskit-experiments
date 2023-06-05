@@ -101,7 +101,7 @@ class DataExtentCalculator:
             :math:`0\leq{}\text{dim}<2`.
         """
         data = np.asarray(data)
-        if dim is None and (len(data.shape) != 2 or (len(data.shape) == 2 and data.shape[1] != 2)):
+        if dim is None and (len(data.shape) != 2 or data.shape[1] != 2):
             raise QiskitError(
                 "Data must contain two-dimensional values. Expected shape `(m,2)` but got "
                 f"{data.shape} instead."

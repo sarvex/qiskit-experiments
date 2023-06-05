@@ -99,7 +99,7 @@ class MockRestlessBackend(FakeOpenPulse2QV2):
     def _get_state_strings(n_qubits: int) -> List[str]:
         """Generate all state strings for the system."""
         format_str = "{0:0" + str(n_qubits) + "b}"
-        return list(format_str.format(state_num) for state_num in range(2**n_qubits))
+        return [format_str.format(state_num) for state_num in range(2**n_qubits)]
 
     @abstractmethod
     def _compute_outcome_probabilities(self, circuits: List[QuantumCircuit]):
@@ -151,9 +151,12 @@ class MockRestlessBackend(FakeOpenPulse2QV2):
                 prev_outcome = outcome
 
         for idx, circ in enumerate(run_input):
-            counts = {}
-            for key1, key2 in zip(["00", "01", "10", "11"], ["0x0", "0x1", "0x2", "0x3"]):
-                counts[key1] = sorted_memory[idx]["memory"].count(key2)
+            counts = {
+                key1: sorted_memory[idx]["memory"].count(key2)
+                for key1, key2 in zip(
+                    ["00", "01", "10", "11"], ["0x0", "0x1", "0x2", "0x3"]
+                )
+            }
             run_result = {
                 "shots": shots,
                 "success": True,
@@ -277,7 +280,7 @@ class MockIQBackend(FakeOpenPulse2QV2):
 
         if not np.allclose(1, sum(prob_dict.values())):
             raise ValueError("The probabilities given don't sum up to 1.")
-        for key in prob_dict.keys():
+        for key in prob_dict:
             if output_length is not len(key):
                 raise ValueError(
                     "The output lengths of the circuit and the output lengths in the dictionary"
@@ -319,7 +322,7 @@ class MockIQBackend(FakeOpenPulse2QV2):
         Returns:
             Ndarray: A numpy array with values that were produced from normal distribution.
         """
-        samples = [self._rng.normal(0, 1, size=1) for qubit in qubits]
+        samples = [self._rng.normal(0, 1, size=1) for _ in qubits]
         # we squeeze the second dimension because samples is List[qubit_number][0][0\1] = I\Q
         # and we want to change it to be List[qubit_number][0\1]
         return np.squeeze(np.array(samples), axis=1)
@@ -523,9 +526,9 @@ class MockIQBackend(FakeOpenPulse2QV2):
                 "success": True,
                 "header": {"metadata": circ.metadata},
                 "meas_level": meas_level,
+                "data": self._generate_data(prob, circ),
             }
 
-            run_result["data"] = self._generate_data(prob, circ)
             result["results"].append(run_result)
 
         return FakeJob(self, Result.from_dict(result))
@@ -689,19 +692,15 @@ class MockIQParallelBackend(MockIQBackend):
         shots = self.options.get("shots")
         meas_level = self.options.get("meas_level")
         meas_return = self.options.get("meas_return")
-        run_result = {}
-
-        if meas_level == MeasLevel.KERNELED:
-            memory = self._parallel_draw_iq_shots(list_exp_dict, shots, circ_qubit_list, circ_idx)
-            if meas_return == "avg":
-                memory = np.average(np.array(memory), axis=0).tolist()
-
-            run_result["memory"] = memory
-        else:
+        if meas_level != MeasLevel.KERNELED:
             # The backend doesn't currently support 'meas_level = MeasLevel.CLASSIFIED'.
             raise QiskitError("Classified data generator isn't supported for this backend")
 
-        return run_result
+        memory = self._parallel_draw_iq_shots(list_exp_dict, shots, circ_qubit_list, circ_idx)
+        if meas_return == "avg":
+            memory = np.average(np.array(memory), axis=0).tolist()
+
+        return {"memory": memory}
 
     def run(self, run_input: List[QuantumCircuit], **run_options) -> FakeJob:
         """
@@ -755,9 +754,11 @@ class MockIQParallelBackend(MockIQBackend):
                 "success": True,
                 "header": {"metadata": circ.metadata},
                 "meas_level": meas_level,
+                "data": self._parallel_generate_data(
+                    experiment_data_list, circ_idx
+                ),
             }
 
-            run_result["data"] = self._parallel_generate_data(experiment_data_list, circ_idx)
             result["results"].append(run_result)
 
         return FakeJob(self, Result.from_dict(result))

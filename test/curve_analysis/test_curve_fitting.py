@@ -40,11 +40,10 @@ class TestCurveFitting(QiskitExperimentsTestCase):
         circuits = transpile(circuits, sim)
         job = sim.run(circuits, shots=shots, seed_simulator=10)
         result = job.result()
-        data = [
+        return [
             {"counts": result.get_counts(i), "metadata": {"xval": theta}}
             for i, theta in enumerate(thetas)
         ]
-        return data
 
     @property
     def objective0(self):

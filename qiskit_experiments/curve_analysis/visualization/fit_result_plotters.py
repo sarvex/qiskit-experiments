@@ -101,10 +101,9 @@ class MplDrawSingleCanvas:
 
         # get axis scaling factor
         for this_axis in ("x", "y"):
-            sub_axis = getattr(axis, this_axis + "axis")
-            unit = tick_labels[this_axis + "val_unit"]
-            label = tick_labels[this_axis + "label"]
-            if unit:
+            sub_axis = getattr(axis, f"{this_axis}axis")
+            label = tick_labels[f"{this_axis}label"]
+            if unit := tick_labels[f"{this_axis}val_unit"]:
                 maxv = np.max(np.abs(sub_axis.get_data_interval()))
                 scaled_maxv, prefix = detach_prefix(maxv, decimal=3)
                 prefactor = scaled_maxv / maxv

@@ -252,7 +252,7 @@ class EFRoughXSXAmplitudeCal(RoughAmplitudeCal):
         super().__init__(
             physical_qubits,
             calibrations,
-            schedule_name="x" + ef_pulse_label,
+            schedule_name=f"x{ef_pulse_label}",
             amplitudes=amplitudes,
             backend=backend,
             cal_parameter_name="amp",
@@ -263,13 +263,13 @@ class EFRoughXSXAmplitudeCal(RoughAmplitudeCal):
             AnglesSchedules(
                 target_angle=np.pi,
                 parameter="amp",
-                schedule="x" + ef_pulse_label,
+                schedule=f"x{ef_pulse_label}",
                 previous_value=None,
             ),
             AnglesSchedules(
                 target_angle=np.pi / 2,
                 parameter="amp",
-                schedule="sx" + ef_pulse_label,
+                schedule=f"sx{ef_pulse_label}",
                 previous_value=None,
             ),
         ]

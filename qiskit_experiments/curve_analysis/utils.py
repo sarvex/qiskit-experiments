@@ -51,10 +51,7 @@ def is_error_not_significant(
         return True
 
     threshold = absolute if absolute is not None else fraction * val.nominal_value
-    if np.isnan(val.std_dev) or val.std_dev < threshold:
-        return True
-
-    return False
+    return bool(np.isnan(val.std_dev) or val.std_dev < threshold)
 
 
 def analysis_result_to_repr(result: AnalysisResultData) -> str:
@@ -238,12 +235,11 @@ def filter_data(data: List[Dict[str, any]], **filters) -> List[Dict[str, any]]:
         return data
     filtered_data = []
     for datum in data:
-        include = True
         metadata = datum["metadata"]
-        for key, val in filters.items():
-            if key not in metadata or metadata[key] != val:
-                include = False
-                break
+        include = not any(
+            key not in metadata or metadata[key] != val
+            for key, val in filters.items()
+        )
         if include:
             filtered_data.append(datum)
     return filtered_data

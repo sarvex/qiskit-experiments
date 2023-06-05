@@ -38,7 +38,7 @@ class TestDataExtentCalculator(QiskitExperimentsTestCase):
     ) -> List[np.ndarray]:
         # Create a list of bin edges by which to divide the target extent
         bin_edges = [
-            np.histogram_bin_edges(extent[0:2], bins=n_data).tolist(),
+            np.histogram_bin_edges(extent[:2], bins=n_data).tolist(),
             np.histogram_bin_edges(extent[2:], bins=n_data).tolist(),
         ]
 
@@ -61,9 +61,7 @@ class TestDataExtentCalculator(QiskitExperimentsTestCase):
                 )
                 dummy_data.append(_dummy_data.swapaxes(-1, -2))
         else:
-            for (x_min, x_max), (y_min, y_max) in it.product(
-                *tuple(list(zip(b[0:-1], b[1:])) for b in bin_edges)
-            ):
+            for (x_min, x_max), (y_min, y_max) in it.product(*tuple(list(zip(b[:-1], b[1:])) for b in bin_edges)):
                 _dummy_data = np.asarray(
                     [
                         np.linspace(x_min, x_max, n_points),
@@ -89,9 +87,9 @@ class TestDataExtentCalculator(QiskitExperimentsTestCase):
         dummy_data = self._dummy_data(extent, n_data=n_data)
         ext_calc = DataExtentCalculator(multiplier=multiplier, aspect_ratio=aspect_ratio)
         # Add data as 2D and 1D arrays to test both methods
-        for d in dummy_data[0 : int(n_data / 2)]:
+        for d in dummy_data[:n_data // 2]:
             ext_calc.register_data(d)
-        for d in dummy_data[int(n_data / 2) :]:
+        for d in dummy_data[n_data // 2:]:
             for i_dim in range(2):
                 ext_calc.register_data(d[:, i_dim], dim=i_dim)
 

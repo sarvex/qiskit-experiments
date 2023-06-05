@@ -192,13 +192,12 @@ class RBAnalysis(curve.CurveAnalysis):
 
         # Calculate EPG
         if self._gate_counts_per_clifford is not None and self.options.gate_error_ratio:
-            epg_dict = _calculate_epg(
+            if epg_dict := _calculate_epg(
                 epc=epc,
                 qubits=self._physical_qubits,
                 gate_error_ratio=self.options.gate_error_ratio,
                 gate_counts_per_clifford=self._gate_counts_per_clifford,
-            )
-            if epg_dict:
+            ):
                 for gate, epg_val in epg_dict.items():
                     outcomes.append(
                         AnalysisResultData(
@@ -251,14 +250,12 @@ class RBAnalysis(curve.CurveAnalysis):
             self._gate_counts_per_clifford = dict(avg_gpc)
 
             if self.options.gate_error_ratio == "default":
-                # Gate error dict is computed for gates appearing in counts dictionary
-                # Error ratio among gates is determined based on the predefined lookup table.
-                # This is not always accurate for every quantum backends.
-                gate_error_ratio = {}
-                for qinds, gate in self._gate_counts_per_clifford.keys():
-                    if set(qinds) != set(experiment_data.metadata["physical_qubits"]):
-                        continue
-                    gate_error_ratio[gate] = _lookup_epg_ratio(gate, len(qinds))
+                gate_error_ratio = {
+                    gate: _lookup_epg_ratio(gate, len(qinds))
+                    for qinds, gate in self._gate_counts_per_clifford.keys()
+                    if set(qinds)
+                    == set(experiment_data.metadata["physical_qubits"])
+                }
                 self.set_options(gate_error_ratio=gate_error_ratio)
 
         # Get qubit number
@@ -290,54 +287,54 @@ def _lookup_epg_ratio(gate: str, n_qubits: int) -> Union[None, int]:
         QiskitError: When number of qubit is more than three.
     """
 
-    # Gate count in (X, SX)-based decomposition. VZ gate contribution is ignored.
-    # Amplitude or duration modulated pulse implementation is not considered.
-    standard_1q_ratio = {
-        "u1": 0.0,
-        "u2": 1.0,
-        "u3": 2.0,
-        "u": 2.0,
-        "p": 0.0,
-        "x": 1.0,
-        "y": 1.0,
-        "z": 0.0,
-        "t": 0.0,
-        "tdg": 0.0,
-        "s": 0.0,
-        "sdg": 0.0,
-        "sx": 1.0,
-        "sxdg": 1.0,
-        "rx": 2.0,
-        "ry": 2.0,
-        "rz": 0.0,
-        "id": 0.0,
-        "h": 1.0,
-    }
-
-    # Gate count in (CX, CSX)-based decomposition, 1q gate contribution is ignored.
-    # Amplitude or duration modulated pulse implementation is not considered.
-    standard_2q_ratio = {
-        "swap": 3.0,
-        "rxx": 2.0,
-        "rzz": 2.0,
-        "cx": 1.0,
-        "cy": 1.0,
-        "cz": 1.0,
-        "ch": 1.0,
-        "crx": 2.0,
-        "cry": 2.0,
-        "crz": 2.0,
-        "csx": 1.0,
-        "cu1": 2.0,
-        "cp": 2.0,
-        "cu": 2.0,
-        "cu3": 2.0,
-    }
-
     if n_qubits == 1:
+        # Gate count in (X, SX)-based decomposition. VZ gate contribution is ignored.
+        # Amplitude or duration modulated pulse implementation is not considered.
+        standard_1q_ratio = {
+            "u1": 0.0,
+            "u2": 1.0,
+            "u3": 2.0,
+            "u": 2.0,
+            "p": 0.0,
+            "x": 1.0,
+            "y": 1.0,
+            "z": 0.0,
+            "t": 0.0,
+            "tdg": 0.0,
+            "s": 0.0,
+            "sdg": 0.0,
+            "sx": 1.0,
+            "sxdg": 1.0,
+            "rx": 2.0,
+            "ry": 2.0,
+            "rz": 0.0,
+            "id": 0.0,
+            "h": 1.0,
+        }
+
         return standard_1q_ratio.get(gate, None)
 
     if n_qubits == 2:
+        # Gate count in (CX, CSX)-based decomposition, 1q gate contribution is ignored.
+        # Amplitude or duration modulated pulse implementation is not considered.
+        standard_2q_ratio = {
+            "swap": 3.0,
+            "rxx": 2.0,
+            "rzz": 2.0,
+            "cx": 1.0,
+            "cy": 1.0,
+            "cz": 1.0,
+            "ch": 1.0,
+            "crx": 2.0,
+            "cry": 2.0,
+            "crz": 2.0,
+            "csx": 1.0,
+            "cu1": 2.0,
+            "cp": 2.0,
+            "cu": 2.0,
+            "cu3": 2.0,
+        }
+
         return standard_2q_ratio.get(gate, None)
 
     raise QiskitError(
@@ -368,10 +365,7 @@ def _calculate_epg(
         formatted_key = tuple(sorted(qubits)), gate
         norm += r_epg * gate_counts_per_clifford.get(formatted_key, 0.0)
 
-    epgs = {}
-    for gate, r_epg in gate_error_ratio.items():
-        epgs[gate] = r_epg * epc / norm
-    return epgs
+    return {gate: r_epg * epc / norm for gate, r_epg in gate_error_ratio.items()}
 
 
 def _exclude_1q_error(

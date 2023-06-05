@@ -528,13 +528,12 @@ class MockIQDragHelper(MockIQExperimentHelper):
 
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
             n_gates = circuit.count_ops()[gate_name]
             beta = next(iter(circuit.calibrations[gate_name].keys()))[1][0]
 
             # Dictionary of output string vectors and their probability
             prob = np.sin(2 * np.pi * n_gates * freq * (beta - ideal_beta) / 4) ** 2
-            probability_output_dict["1"] = max_prob * prob + offset_prob
+            probability_output_dict = {"1": max_prob * prob + offset_prob}
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
         return output_dict_list
@@ -558,11 +557,9 @@ class MockIQFineDragHelper(MockIQExperimentHelper):
         error = self.error
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
             n_gates = circuit.count_ops().get("rz", 0) // 2
 
-            # Dictionary of output string vectors and their probability
-            probability_output_dict["1"] = 0.5 * np.sin(n_gates * error) + 0.5
+            probability_output_dict = {"1": 0.5 * np.sin(n_gates * error) + 0.5}
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
         return output_dict_list
@@ -596,11 +593,9 @@ class MockIQRabiHelper(MockIQExperimentHelper):
         amplitude_to_angle = self.amplitude_to_angle
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
             amp = next(iter(circuit.calibrations["Rabi"].keys()))[1][0]
 
-            # Dictionary of output string vectors and their probability
-            probability_output_dict["1"] = np.sin(amplitude_to_angle * amp) ** 2
+            probability_output_dict = {"1": np.sin(amplitude_to_angle * amp)**2}
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
         return output_dict_list
@@ -694,7 +689,6 @@ class MockIQFineAmpHelper(MockIQExperimentHelper):
         gate_name = self.gate_name
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
             n_ops = circuit.count_ops().get(gate_name, 0)
             angle = n_ops * (angle_per_gate + angle_error)
 
@@ -704,8 +698,7 @@ class MockIQFineAmpHelper(MockIQExperimentHelper):
             if gate_name != "x":
                 angle += np.pi * circuit.count_ops().get("x", 0)
 
-            # Dictionary of output string vectors and their probability
-            probability_output_dict["1"] = np.sin(angle / 2) ** 2
+            probability_output_dict = {"1": np.sin(angle / 2)**2}
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
 
@@ -732,21 +725,16 @@ class MockIQRamseyXYHelper(MockIQExperimentHelper):
         freq_shift = self.freq_shift
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
             series = circuit.metadata["series"]
             delay = circuit.metadata["xval"]
 
-            if series == "X":
-                phase_offset = 0.0
-            else:
-                phase_offset = np.pi / 2
-
-            probability_output_dict["1"] = (
-                0.5
+            phase_offset = 0.0 if series == "X" else np.pi / 2
+            probability_output_dict = {
+                "1": 0.5
                 * np.exp(-delay / t2ramsey)
                 * np.cos(2 * np.pi * delay * freq_shift - phase_offset)
                 + 0.5
-            )
+            }
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
         return output_dict_list
@@ -780,7 +768,6 @@ class MockIQSpectroscopyHelper(MockIQExperimentHelper):
         line_width = self.line_width
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
             if self.gate_name == "measure":
                 freq_shift = (
                     next(iter(circuit.calibrations[self.gate_name].values())).blocks[0].frequency
@@ -791,7 +778,9 @@ class MockIQSpectroscopyHelper(MockIQExperimentHelper):
                 raise ValueError(f"The gate name {str(self.gate_name)} isn't supported.")
             delta_freq = freq_shift - freq_offset
 
-            probability_output_dict["1"] = np.abs(1 / (1 + 2.0j * delta_freq / line_width))
+            probability_output_dict = {
+                "1": np.abs(1 / (1 + 2.0j * delta_freq / line_width))
+            }
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
         return output_dict_list
@@ -808,8 +797,7 @@ class MockIQSpectroscopyHelper(MockIQExperimentHelper):
             for circ_idx, circ in enumerate(circuits):
                 freq_shift = next(iter(circ.calibrations["measure"].values())).blocks[0].frequency
                 delta_freq_list[circ_idx] = freq_shift - self.freq_offset
-        phase = [delta_freq / self.line_width for delta_freq in delta_freq_list]
-        return phase
+        return [delta_freq / self.line_width for delta_freq in delta_freq_list]
 
 
 class MockIQReadoutAngleHelper(MockIQExperimentHelper):
@@ -843,13 +831,11 @@ class MockIQHalfAngleHelper(MockIQExperimentHelper):
         error = self.error
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
             n_gates = circuit.metadata["xval"]
 
-            # Dictionary of output string vectors and their probability
-            probability_output_dict["1"] = (
-                0.5 * np.sin((-1) ** (n_gates + 1) * n_gates * error) + 0.5
-            )
+            probability_output_dict = {
+                "1": 0.5 * np.sin((-1) ** (n_gates + 1) * n_gates * error) + 0.5
+            }
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
 
@@ -872,8 +858,6 @@ class MockIQT1Helper(MockIQExperimentHelper):
         """Return the probability of being in the excited state."""
         output_dict_list = []
         for circuit in circuits:
-            probability_output_dict = {}
-
             # extracting information from the circuit.
             qubit_idx = circuit.metadata["qubit"]
             delay = circuit.metadata["xval"]
@@ -881,7 +865,7 @@ class MockIQT1Helper(MockIQExperimentHelper):
             # creating a probability dict.
             if qubit_idx >= len(self._t1):
                 raise QiskitError(f"There is no 'T1' value for qubit index {qubit_idx}.")
-            probability_output_dict["1"] = np.exp(-delay / self._t1[qubit_idx])
+            probability_output_dict = {"1": np.exp(-delay / self._t1[qubit_idx])}
             probability_output_dict["0"] = 1 - probability_output_dict["1"]
             output_dict_list.append(probability_output_dict)
 

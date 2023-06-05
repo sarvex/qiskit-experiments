@@ -304,7 +304,7 @@ def partial_trace_super(dim1: int, dim2: int) -> np.array:
         A Numpy array of the partial trace superoperator S_TrB.
     """
     iden = sps.identity(dim1)
-    ptr = sps.csr_matrix((dim1 * dim1, dim1 * dim2 * dim1 * dim2))
+    ptr = sps.csr_matrix((dim1**2, dim1 * dim2 * dim1 * dim2))
 
     for j in range(dim2):
         v_j = sps.coo_matrix(([1], ([0], [j])), shape=(1, dim2))

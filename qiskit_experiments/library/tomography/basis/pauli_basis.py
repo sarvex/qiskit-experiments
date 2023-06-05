@@ -73,20 +73,17 @@ class PauliMeasurementBasis(LocalMeasurementBasis):
         if mitigator is None:
             return None
         povm = {}
-        if isinstance(mitigator, LocalReadoutMitigator):
-            povm = {}
-            for qubit in mitigator.qubits:
-                amat = mitigator.assignment_matrix(qubit)
-                povm[(qubit,)] = {(0,): [DensityMatrix(np.diag(row)) for row in amat]}
-        else:
+        if not isinstance(mitigator, LocalReadoutMitigator):
             raise QiskitError("Invalid mitigator: must be LocalReadoutMitigator")
+        povm = {}
+        for qubit in mitigator.qubits:
+            amat = mitigator.assignment_matrix(qubit)
+            povm[(qubit,)] = {(0,): [DensityMatrix(np.diag(row)) for row in amat]}
         return povm
 
     def __json_encode__(self):
         # Override LocalMeasurementBasis's encoder
-        if self._mitigator is not None:
-            return {"mitigator": self._mitigator}
-        return {}
+        return {"mitigator": self._mitigator} if self._mitigator is not None else {}
 
 
 class PauliPreparationBasis(LocalPreparationBasis):

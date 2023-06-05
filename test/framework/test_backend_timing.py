@@ -154,7 +154,9 @@ class TestBackendTiming(QiskitExperimentsTestCase):
         backend = FakeNairobiV2()
         backend.target.dt = None
         timing = BackendTiming(backend)
-        self.assertAlmostEqual(timing.delay_time(time=time_in), time_out, delta=1e-6 * self.dt)
+        self.assertAlmostEqual(
+            timing.delay_time(time=time_out), time_out, delta=1e-6 * self.dt
+        )
 
     def test_pulse_time(self):
         """Test pulse_time calculation"""

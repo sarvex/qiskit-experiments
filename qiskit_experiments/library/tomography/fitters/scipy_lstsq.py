@@ -165,7 +165,7 @@ def scipy_linear_lstsq(
         # Reshape fit to a density matrix
         size = len(sol)
         dim = int(np.sqrt(size))
-        if dim * dim != size:
+        if dim**2 != size:
             raise AnalysisError("Least-squares fitter: invalid result shape.")
         fit = np.reshape(sol, (dim, dim), order="F")
         fits.append(fit)
@@ -175,9 +175,7 @@ def scipy_linear_lstsq(
     t_stop = time.time()
     metadata["fitter_time"] = t_stop - t_start
 
-    if len(fits) == 1:
-        return fits[0], metadata
-    return fits, metadata
+    return (fits[0], metadata) if len(fits) == 1 else (fits, metadata)
 
 
 def scipy_gaussian_lstsq(

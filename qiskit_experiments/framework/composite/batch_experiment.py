@@ -134,7 +134,9 @@ class BatchExperiment(CompositeExperiment):
         """Remap qubits if physical qubit layout is different to batch layout"""
         num_qubits = self.num_qubits
         num_clbits = circuit.num_clbits
-        new_circuit = QuantumCircuit(num_qubits, num_clbits, name="batch_" + circuit.name)
+        new_circuit = QuantumCircuit(
+            num_qubits, num_clbits, name=f"batch_{circuit.name}"
+        )
         new_circuit.metadata = circuit.metadata
         new_circuit.append(circuit, qubit_mapping, list(range(num_clbits)))
         return new_circuit
@@ -179,8 +181,7 @@ class BatchExperiment(CompositeExperiment):
 
     def _run_jobs(self, circuits: List[QuantumCircuit], **run_options) -> List[Job]:
         truncated_metadata = [circ.metadata for circ in circuits]
-        jobs = self._run_jobs_recursive(circuits, truncated_metadata, **run_options)
-        return jobs
+        return self._run_jobs_recursive(circuits, truncated_metadata, **run_options)
 
     @classmethod
     def _default_experiment_options(cls) -> Options:

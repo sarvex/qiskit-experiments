@@ -196,7 +196,4 @@ class ErrorAmplificationAnalysis(curve.CurveAnalysis):
             abs(fit_d_theta.nominal_value) < abs(self.options.max_good_angle_error),
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"

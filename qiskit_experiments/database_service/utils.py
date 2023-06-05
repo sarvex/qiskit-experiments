@@ -75,8 +75,7 @@ def utc_to_local(utc_dt: datetime) -> datetime:
     Returns:
         A ``datetime`` with the local timezone.
     """
-    local_dt = utc_dt.astimezone(tz.tzlocal())
-    return local_dt
+    return utc_dt.astimezone(tz.tzlocal())
 
 
 def plot_to_svg_bytes(figure: "pyplot.Figure") -> bytes:
@@ -140,7 +139,7 @@ def save_data(
             attempts += 1
             if is_new:
                 try:
-                    kwargs.update(new_data)
+                    kwargs |= new_data
                     kwargs.update(update_data)
                     return True, new_func(**kwargs)
                 except dup_entry_exception:

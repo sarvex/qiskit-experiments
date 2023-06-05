@@ -182,15 +182,16 @@ class CurvePlotter(BasePlotter):
         report = ""
 
         if "primary_results" in self.supplementary_data:
-            lines = []
-            for outcome in self.supplementary_data["primary_results"]:
-                if isinstance(outcome.value, (float, UFloat)):
-                    lines.append(analysis_result_to_repr(outcome))
+            lines = [
+                analysis_result_to_repr(outcome)
+                for outcome in self.supplementary_data["primary_results"]
+                if isinstance(outcome.value, (float, UFloat))
+            ]
             report += "\n".join(lines)
 
         if "fit_red_chi" in self.supplementary_data:
             red_chi = self.supplementary_data["fit_red_chi"]
-            if len(report) > 0:
+            if report != "":
                 report += "\n"
             if isinstance(red_chi, float):
                 report += f"{self.figure_options.report_red_chi2_label} = {red_chi: .4g}"
@@ -205,9 +206,10 @@ class CurvePlotter(BasePlotter):
 
                 # Created indented text of reduced-chi squared results.
                 report += f"{self.figure_options.report_red_chi2_label} per fit\n"
-                lines = []
-                for mod_name, mod_chi in red_chi.items():
-                    lines.append(f"  * {mod_name}: {mod_chi: .4g}")
+                lines = [
+                    f"  * {mod_name}: {mod_chi: .4g}"
+                    for mod_name, mod_chi in red_chi.items()
+                ]
                 report += "\n".join(lines)
 
         return report

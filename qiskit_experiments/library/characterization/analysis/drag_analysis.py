@@ -220,16 +220,16 @@ class DragCalAnalysis(curve.CurveAnalysis):
             curve.utils.is_error_not_significant(fit_beta),
         ]
 
-        if all(criteria):
-            return "good"
-
-        return "bad"
+        return "good" if all(criteria) else "bad"
 
     def _initialize(
         self,
         experiment_data: ExperimentData,
     ):
-        reps = set(d.get("metadata", None).get("nrep", None) for d in experiment_data.data())
+        reps = {
+            d.get("metadata", None).get("nrep", None)
+            for d in experiment_data.data()
+        }
         if None in reps:
             reps.remove(None)
         if not reps:

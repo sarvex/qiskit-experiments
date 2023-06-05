@@ -203,14 +203,17 @@ class StandardRB(BaseExperiment, RestlessMixin):
         sequences = []
         if self.experiment_options.full_sampling:
             for _ in range(self.experiment_options.num_samples):
-                for length in self.experiment_options.lengths:
-                    sequences.append(self.__sample_sequence(length, rng))
+                sequences.extend(
+                    self.__sample_sequence(length, rng)
+                    for length in self.experiment_options.lengths
+                )
         else:
             for _ in range(self.experiment_options.num_samples):
                 longest_seq = self.__sample_sequence(max(self.experiment_options.lengths), rng)
-                for length in self.experiment_options.lengths:
-                    sequences.append(longest_seq[:length])
-
+                sequences.extend(
+                    longest_seq[:length]
+                    for length in self.experiment_options.lengths
+                )
         return sequences
 
     def _get_basis_gates(self) -> Optional[Tuple[str, ...]]:
@@ -325,9 +328,7 @@ class StandardRB(BaseExperiment, RestlessMixin):
         return elem.to_instruction()
 
     def __identity_clifford(self) -> SequenceElementType:
-        if self.num_qubits <= 2:
-            return 0
-        return Clifford(np.eye(2 * self.num_qubits))
+        return 0 if self.num_qubits <= 2 else Clifford(np.eye(2 * self.num_qubits))
 
     def __compose_clifford_seq(
         self, base_elem: SequenceElementType, elements: Sequence[SequenceElementType]
@@ -378,9 +379,12 @@ class StandardRB(BaseExperiment, RestlessMixin):
 
                 instructions = []  # (op_name, qargs) for each element where qargs means qubit tuple
                 for qargs in qargs_patterns:
-                    for op_name in self.backend.target.operation_names_for_qargs(qargs):
-                        instructions.append((op_name, qargs))
-
+                    instructions.extend(
+                        (op_name, qargs)
+                        for op_name in self.backend.target.operation_names_for_qargs(
+                            qargs
+                        )
+                    )
                 common_calibrations = defaultdict(dict)
                 for op_name, qargs in instructions:
                     inst_prop = self.backend.target[op_name].get(qargs, None)

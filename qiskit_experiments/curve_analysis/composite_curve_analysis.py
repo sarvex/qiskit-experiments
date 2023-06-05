@@ -131,10 +131,7 @@ class CompositeCurveAnalysis(BaseAnalysis):
     @property
     def models(self) -> Dict[str, List[lmfit.Model]]:
         """Return fit models."""
-        models = {}
-        for analysis in self._analyses:
-            models[analysis.name] = analysis.models
-        return models
+        return {analysis.name: analysis.models for analysis in self._analyses}
 
     @property
     def plotter(self) -> BasePlotter:
@@ -184,10 +181,14 @@ class CompositeCurveAnalysis(BaseAnalysis):
         Returns:
             String that represents fit result quality. Usually "good" or "bad".
         """
-        for analysis in self._analyses:
-            if analysis._evaluate_quality(fit_data[analysis.name]) != "good":
-                return "bad"
-        return "good"
+        return next(
+            (
+                "bad"
+                for analysis in self._analyses
+                if analysis._evaluate_quality(fit_data[analysis.name]) != "good"
+            ),
+            "good",
+        )
 
     # pylint: disable=unused-argument
     def _create_analysis_results(
@@ -251,14 +252,12 @@ class CompositeCurveAnalysis(BaseAnalysis):
             if isinstance(fields["curve_drawer"], BaseDrawer):
                 plotter = self.options.plotter
                 plotter.drawer = fields.pop("curve_drawer")
-                fields["plotter"] = plotter
             else:
                 drawer = fields["curve_drawer"]
                 compat_drawer = LegacyCurveCompatDrawer(drawer)
                 plotter = self.options.plotter
                 plotter.drawer = compat_drawer
-                fields["plotter"] = plotter
-
+            fields["plotter"] = plotter
         for field in fields:
             if not hasattr(self.options, field):
                 warnings.warn(
@@ -295,7 +294,7 @@ class CompositeCurveAnalysis(BaseAnalysis):
                 for model in analysis.models:
                     sub_data = processed_data.get_subset_of(model._name)
                     self.plotter.set_series_data(
-                        model._name + f"_{analysis.name}",
+                        f"{model._name}_{analysis.name}",
                         x=sub_data.x,
                         y=sub_data.y,
                     )
@@ -306,7 +305,7 @@ class CompositeCurveAnalysis(BaseAnalysis):
                 for model in analysis.models:
                     sub_data = formatted_data.get_subset_of(model._name)
                     self.plotter.set_series_data(
-                        model._name + f"_{analysis.name}",
+                        f"{model._name}_{analysis.name}",
                         x_formatted=sub_data.x,
                         y_formatted=sub_data.y,
                         y_formatted_err=sub_data.y_err,
@@ -355,7 +354,7 @@ class CompositeCurveAnalysis(BaseAnalysis):
                         y_interp = unp.nominal_values(y_data_with_uncertainty)
                         # Add fit line data
                         self.plotter.set_series_data(
-                            model._name + f"_{analysis.name}",
+                            f"{model._name}_{analysis.name}",
                             x_interp=x_interp,
                             y_interp=y_interp,
                         )
@@ -364,7 +363,7 @@ class CompositeCurveAnalysis(BaseAnalysis):
                             y_interp_err = unp.std_devs(y_data_with_uncertainty)
                             if np.isfinite(y_interp_err).all():
                                 self.plotter.set_series_data(
-                                    model._name + f"_{analysis.name}",
+                                    f"{model._name}_{analysis.name}",
                                     y_interp_err=y_interp_err,
                                 )
 

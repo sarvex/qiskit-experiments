@@ -19,7 +19,7 @@ import functools
 
 def _method_cache_name(instance: any) -> str:
     """Attribute name for storing cache in an instance"""
-    return "_CACHE_" + type(instance).__name__
+    return f"_CACHE_{type(instance).__name__}"
 
 
 def _get_method_cache(instance: any) -> Dict:

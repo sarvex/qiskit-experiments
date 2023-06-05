@@ -67,8 +67,5 @@ class NoisyDelayAerBackend(AerSimulator):
             self._t1, self._t2, dt=self._dt_factor, op_types=self._op_types
         )
 
-        noisy_circuits = []
-        for circ in run_input:
-            noisy_circuits.append(relax_pass(circ))
-
+        noisy_circuits = [relax_pass(circ) for circ in run_input]
         return super().run(noisy_circuits, **run_options)

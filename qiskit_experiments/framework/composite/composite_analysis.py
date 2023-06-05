@@ -92,9 +92,7 @@ class CompositeAnalysis(BaseAnalysis):
             The analysis instance for the specified index, or a list of all
             analysis instances if index is None.
         """
-        if index is None:
-            return self._analyses
-        return self._analyses[index]
+        return self._analyses if index is None else self._analyses[index]
 
     def copy(self):
         ret = super().copy()
@@ -157,19 +155,19 @@ class CompositeAnalysis(BaseAnalysis):
         Raises:
             AnalysisError: If the component experiment data cannot be extracted.
         """
-        if not self._flatten_results:
-            # Retrieve child data for component experiments for updating
-            component_index = experiment_data.metadata.get("component_child_index", [])
-            if not component_index:
-                raise AnalysisError("Unable to extract component child experiment data")
-            component_expdata = [experiment_data.child_data(i) for i in component_index]
-        else:
+        if self._flatten_results:
             # Initialize temporary ExperimentData containers for
             # each component experiment to analysis on. These will
             # not be saved but results and figures will be collected
             # from them
             component_expdata = self._initialize_component_experiment_data(experiment_data)
 
+        elif component_index := experiment_data.metadata.get(
+            "component_child_index", []
+        ):
+            component_expdata = [experiment_data.child_data(i) for i in component_index]
+        else:
+            raise AnalysisError("Unable to extract component child experiment data")
         # Compute marginalize data for each component experiment
         marginalized_data = self._marginalized_component_data(experiment_data.data())
 
@@ -224,25 +222,22 @@ class CompositeAnalysis(BaseAnalysis):
                     else:
                         sub_data["counts"] = datum["counts"]
                 if "memory" in datum:
-                    if composite_clbits is not None:
-                        # level 2
-                        if f_memory is not None:
-                            idx = slice(
-                                -1 - composite_clbits[i][-1], -composite_clbits[i][0] or None
-                            )
-                            sub_data["memory"] = [shot[idx] for shot in f_memory]
-                        # level 1
-                        else:
-                            mem = np.array(datum["memory"])
-
-                            # Averaged level 1 data
-                            if len(mem.shape) == 2:
-                                sub_data["memory"] = mem[composite_clbits[i]].tolist()
-                            # Single-shot level 1 data
-                            if len(mem.shape) == 3:
-                                sub_data["memory"] = mem[:, composite_clbits[i]].tolist()
-                    else:
+                    if composite_clbits is None:
                         sub_data["memory"] = datum["memory"]
+                    elif f_memory is not None:
+                        idx = slice(
+                            -1 - composite_clbits[i][-1], -composite_clbits[i][0] or None
+                        )
+                        sub_data["memory"] = [shot[idx] for shot in f_memory]
+                    else:
+                        mem = np.array(datum["memory"])
+
+                        # Averaged level 1 data
+                        if len(mem.shape) == 2:
+                            sub_data["memory"] = mem[composite_clbits[i]].tolist()
+                        # Single-shot level 1 data
+                        if len(mem.shape) == 3:
+                            sub_data["memory"] = mem[:, composite_clbits[i]].tolist()
                 marginalized_data[index].append(sub_data)
 
         # Sort by index
@@ -259,7 +254,7 @@ class CompositeAnalysis(BaseAnalysis):
         ):
             num_cbits = 1 + max(cbit for cbit_list in composite_clbits for cbit in cbit_list)
             header = {"memory_slots": num_cbits}
-            f_memory = list(format_counts_memory(shot, header) for shot in datum["memory"])
+            f_memory = [format_counts_memory(shot, header) for shot in datum["memory"]]
 
         return f_memory
 

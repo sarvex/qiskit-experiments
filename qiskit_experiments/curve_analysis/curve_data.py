@@ -282,23 +282,17 @@ class CurveFitResult:
                     ret += f"\n  * {name} = {param.nominal_value}"
         if self.correl is not None:
             ret += "\n - correlations:"
-            correlated = {}
-            for pi, pj in itertools.combinations(range(len(self.var_names)), 2):
-                correlated[(pi, pj)] = self.correl[pi, pj]
+            correlated = {
+                (pi, pj): self.correl[pi, pj]
+                for pi, pj in itertools.combinations(range(len(self.var_names)), 2)
+            }
             for (pi, pj), corr in sorted(correlated.items(), key=lambda item: item[1]):
                 ret += f"\n  * ({self.var_names[pi]}, {self.var_names[pj]}) = {corr}"
 
         return ret
 
     def __copy__(self):
-        instance = CurveFitResult(**self.__json_encode__())
-        # Copying ufloat invalidate parameter correlation.
-        # Note that ufloat object has `self._linear_part.linear_combo` dictionary
-        # to store parameter correlation keyed on the ufloat objects.
-        # Copying the ufloat object may change object id, which is the identifier
-        # of ufloat value, thus it invalidates the `linear_combo` dictionary.
-        # To avoid missing correlation, the copy invalidate ufloat parameter object cache.
-        return instance
+        return CurveFitResult(**self.__json_encode__())
 
     def __deepcopy__(self, memo):
         return self.__copy__()

@@ -33,8 +33,7 @@ class FakeAnalysis(BaseAnalysis):
             AnalysisResultData(f"result_{i}", value) for i, value in enumerate(rng.random(3))
         ]
         figures = None
-        add_figures = self.options.get("add_figures", False)
-        if add_figures:
+        if add_figures := self.options.get("add_figures", False):
             figures = [MatplotlibFigure()]
         return analysis_results, figures
 

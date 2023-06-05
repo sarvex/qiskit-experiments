@@ -158,13 +158,17 @@ class BaseExperiment(ABC, StoreInitArgs):
         args = tuple(getattr(self, "__init_args__", OrderedDict()).values())
         kwargs = dict(getattr(self, "__init_kwargs__", OrderedDict()))
         # Only store non-default valued options
-        experiment_options = dict(
-            (key, getattr(self._experiment_options, key)) for key in self._set_experiment_options
-        )
-        transpile_options = dict(
-            (key, getattr(self._transpile_options, key)) for key in self._set_transpile_options
-        )
-        run_options = dict((key, getattr(self._run_options, key)) for key in self._set_run_options)
+        experiment_options = {
+            key: getattr(self._experiment_options, key)
+            for key in self._set_experiment_options
+        }
+        transpile_options = {
+            key: getattr(self._transpile_options, key)
+            for key in self._set_transpile_options
+        }
+        run_options = {
+            key: getattr(self._run_options, key) for key in self._set_run_options
+        }
         return ExperimentConfig(
             cls=type(self),
             args=args,
@@ -224,11 +228,11 @@ class BaseExperiment(ABC, StoreInitArgs):
                 experiment._set_backend(backend)
             if isinstance(analysis, BaseAnalysis):
                 experiment.analysis = analysis
-            if run_options:
-                experiment.set_run_options(**run_options)
         else:
             experiment = self
 
+        if run_options:
+            experiment.set_run_options(**run_options)
         if experiment.backend is None:
             raise QiskitError("Cannot run experiment, no backend has been set.")
 
@@ -289,10 +293,7 @@ class BaseExperiment(ABC, StoreInitArgs):
             # Run as single job
             job_circuits = [circuits]
 
-        # Run jobs
-        jobs = [self.backend.run(circs, **run_options) for circs in job_circuits]
-
-        return jobs
+        return [self.backend.run(circs, **run_options) for circs in job_circuits]
 
     @abstractmethod
     def circuits(self) -> List[QuantumCircuit]:
@@ -317,9 +318,7 @@ class BaseExperiment(ABC, StoreInitArgs):
         """
         transpile_opts = copy.copy(self.transpile_options.__dict__)
         transpile_opts["initial_layout"] = list(self.physical_qubits)
-        transpiled = transpile(self.circuits(), self.backend, **transpile_opts)
-
-        return transpiled
+        return transpile(self.circuits(), self.backend, **transpile_opts)
 
     @classmethod
     def _default_experiment_options(cls) -> Options:
@@ -417,11 +416,10 @@ class BaseExperiment(ABC, StoreInitArgs):
         By default, this assumes the experiment is running on qubits only. Subclasses can override
         this method to add custom experiment metadata to the returned experiment result data.
         """
-        metadata = {
+        return {
             "physical_qubits": list(self.physical_qubits),
             "device_components": list(map(Qubit, self.physical_qubits)),
         }
-        return metadata
 
     def __json_encode__(self):
         """Convert to format that can be JSON serialized"""

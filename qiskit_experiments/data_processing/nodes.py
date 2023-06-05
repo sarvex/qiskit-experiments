@@ -528,9 +528,8 @@ class DiscriminatorNode(DataAction):
             data = data.reshape((data_length, 2))  # the last dim is guaranteed by _process
 
             # Classify the data using the discriminator and reshape it to dim_1 x ... x dim_k
-            classified = np.array(self._discriminator.predict(data)).reshape(shape[0:-1])
+            classified = np.array(self._discriminator.predict(data)).reshape(shape[:-1])
 
-        # case where a discriminator is applied to each slot.
         else:
             classified = np.empty((self._n_circs, self._n_shots, self._n_slots), dtype=str)
             for idx, discriminator in enumerate(self._discriminator):
@@ -539,13 +538,13 @@ class DiscriminatorNode(DataAction):
                 sub_classified = sub_classified.reshape((self._n_circs, self._n_shots))
                 classified[:, :, idx] = sub_classified
 
-        # Concatenate the bit-strings together.
-        labeled_data = []
-        for idx in range(self._n_circs):
-            labeled_data.append(
-                ["".join(classified[idx, jdx, :][::-1]) for jdx in range(self._n_shots)]
-            )
-
+        labeled_data = [
+            [
+                "".join(classified[idx, jdx, :][::-1])
+                for jdx in range(self._n_shots)
+            ]
+            for idx in range(self._n_circs)
+        ]
         return np.array(labeled_data).reshape((self._n_circs, self._n_shots))
 
 
@@ -578,10 +577,7 @@ class MemoryToCounts(DataAction):
         """
         all_counts = []
         for datum in data:
-            counts = {}
-            for bit_string in set(datum):
-                counts[bit_string] = sum(datum == bit_string)
-
+            counts = {bit_string: sum(datum == bit_string) for bit_string in set(datum)}
             all_counts.append(counts)
 
         return np.array(all_counts)
@@ -612,9 +608,9 @@ class CountsAction(DataAction):
         Raises:
             DataProcessorError: If the data is not a counts dict or a list of counts dicts.
         """
-        valid_count_type = int, np.integer
-
         if self._validate:
+            valid_count_type = int, np.integer
+
             for datum in data:
                 if not isinstance(datum, dict):
                     raise DataProcessorError(
@@ -749,11 +745,11 @@ class Probability(CountsAction):
         self._outcome = outcome
         if isinstance(alpha_prior, Number):
             self._alpha_prior = [alpha_prior, alpha_prior]
+        elif validate and len(alpha_prior) != 2:
+            raise DataProcessorError(
+                "Prior for probability node must be a float or pair of floats."
+            )
         else:
-            if validate and len(alpha_prior) != 2:
-                raise DataProcessorError(
-                    "Prior for probability node must be a float or pair of floats."
-                )
             self._alpha_prior = list(alpha_prior)
 
         super().__init__(validate)
@@ -941,8 +937,8 @@ class RestlessNode(DataAction, ABC):
         self._n_shots = len(data[0])
         self._n_circuits = len(data)
 
-        if self._validate:
-            if data.shape[:2] != (self._n_circuits, self._n_shots):
+        if data.shape[:2] != (self._n_circuits, self._n_shots):
+            if self._validate:
                 raise DataProcessorError(
                     f"The datum given to {self.__class__.__name__} does not convert "
                     "of an array with dimension (number of circuit, number of shots)."
@@ -1033,11 +1029,9 @@ class RestlessToCounts(RestlessNode):
         Returns:
             The restless adjusted string computed by comparing the shot with the previous shot.
         """
-        restless_adjusted_bits = []
-
-        for idx, bit in enumerate(shot):
-            restless_adjusted_bits.append("0" if bit == prev_shot[idx] else "1")
-
+        restless_adjusted_bits = [
+            "0" if bit == prev_shot[idx] else "1" for idx, bit in enumerate(shot)
+        ]
         return "".join(restless_adjusted_bits)
 
 

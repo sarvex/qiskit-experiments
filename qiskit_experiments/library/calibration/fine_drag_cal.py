@@ -123,18 +123,17 @@ class FineDragCal(BaseCalibrationExperiment, FineDrag):
 
         schedule = self._cals.get_schedule(self._sched_name, qubits)
 
-        # Obtain sigma as it is needed for the fine DRAG update rule.
-        sigmas = []
-        for block in schedule.blocks:
-            if isinstance(block, Play) and hasattr(block.pulse, "sigma"):
-                sigmas.append(getattr(block.pulse, "sigma"))
-
+        sigmas = [
+            getattr(block.pulse, "sigma")
+            for block in schedule.blocks
+            if isinstance(block, Play) and hasattr(block.pulse, "sigma")
+        ]
         if len(set(sigmas)) != 1:
             raise CalibrationError(
                 "Cannot run fine Drag calibration on a schedule with multiple values of sigma."
             )
 
-        if len(sigmas) == 0:
+        if not sigmas:
             raise CalibrationError(f"Could not infer sigma from {schedule}.")
 
         d_theta = BaseUpdater.get_value(experiment_data, "d_theta", result_index)

@@ -148,7 +148,9 @@ class TestT2Ramsey(QiskitExperimentsTestCase):
                 delta=TestT2Ramsey.__tolerance__ * res_t2star.value.n,
             )
             self.assertEqual(
-                res_t2star.quality, "good", "Result quality bad for experiment on qubit " + str(i)
+                res_t2star.quality,
+                "good",
+                f"Result quality bad for experiment on qubit {str(i)}",
             )
             res_freq = expdata.child_data(i).analysis_results("Frequency")
             self.assertAlmostEqual(
@@ -157,7 +159,9 @@ class TestT2Ramsey(QiskitExperimentsTestCase):
                 delta=TestT2Ramsey.__tolerance__ * res_freq.value.n,
             )
             self.assertEqual(
-                res_freq.quality, "good", "Result quality bad for experiment on qubit " + str(i)
+                res_freq.quality,
+                "good",
+                f"Result quality bad for experiment on qubit {str(i)}",
             )
 
     def test_t2ramsey_concat_2_experiments(self):

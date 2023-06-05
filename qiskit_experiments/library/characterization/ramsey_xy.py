@@ -377,8 +377,6 @@ class StarkRamseyXY(BaseExperiment):
                     "Note that this experiment is still executable.",
                     UserWarning,
                 )
-            pass
-
         super().set_experiment_options(**fields)
 
     def delays(self) -> np.ndarray:

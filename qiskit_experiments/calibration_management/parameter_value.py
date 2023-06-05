@@ -46,11 +46,7 @@ class ParameterValue:
         serialized parameter values.
         """
         if isinstance(self.valid, str):
-            if self.valid == "True":
-                self.valid = True
-            else:
-                self.valid = False
-
+            self.valid = self.valid == "True"
         if isinstance(self.value, str):
             self.value = self._validated_value(self.value)
 
@@ -65,7 +61,7 @@ class ParameterValue:
                 except ValueError:
                     pass
             else:
-                formats = list(base_fmt + zone for zone in zone_fmts)
+                formats = [base_fmt + zone for zone in zone_fmts]
                 raise CalibrationError(
                     f"Cannot parse {self.date_time} in either of {formats} formats."
                 )

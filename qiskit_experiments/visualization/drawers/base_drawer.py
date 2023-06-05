@@ -509,10 +509,11 @@ class BaseDrawer(ABC):
 
     def config(self) -> Dict:
         """Return the config dictionary for this drawer."""
-        options = dict((key, getattr(self._options, key)) for key in self._set_options)
-        figure_options = dict(
-            (key, getattr(self._figure_options, key)) for key in self._set_figure_options
-        )
+        options = {key: getattr(self._options, key) for key in self._set_options}
+        figure_options = {
+            key: getattr(self._figure_options, key)
+            for key in self._set_figure_options
+        }
 
         return {
             "cls": type(self),

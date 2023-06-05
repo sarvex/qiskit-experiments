@@ -157,75 +157,76 @@ class MockPlotter(BasePlotter):
             filled_y_area_x and filled_y_area_y_{ub,lb}: Draws a filled region as a function of X values.
             filled_x_area_y and filled_x_area_x_{ub,lb}: Draws a filled region as a function of Y values.
         """
-        if self.plotting_enabled:
-            for ser in self.series:
-                if self.data_exists_for(ser, ["x", "y", "z"]):
-                    self.drawer.scatter(
-                        *self.data_for(ser, ["x", "y", "z"]),
-                        name=ser,
-                    )
-                    self._log_plotted_data(ser, ["x", "y", "z"])
+        if not self.plotting_enabled:
+            return
+        for ser in self.series:
+            if self.data_exists_for(ser, ["x", "y", "z"]):
+                self.drawer.scatter(
+                    *self.data_for(ser, ["x", "y", "z"]),
+                    name=ser,
+                )
+                self._log_plotted_data(ser, ["x", "y", "z"])
 
-                if self.data_exists_for(ser, ["scatter_x", "scatter_y"]):
-                    self.drawer.scatter(
-                        *self.data_for(ser, ["scatter_x", "scatter_y"]),
-                        name=ser,
-                        legend=self.legend_enabled_for(ser, "scatter"),
-                    )
-                    self._log_plotted_data(ser, ["scatter_x", "scatter_y"])
+            if self.data_exists_for(ser, ["scatter_x", "scatter_y"]):
+                self.drawer.scatter(
+                    *self.data_for(ser, ["scatter_x", "scatter_y"]),
+                    name=ser,
+                    legend=self.legend_enabled_for(ser, "scatter"),
+                )
+                self._log_plotted_data(ser, ["scatter_x", "scatter_y"])
 
-                if self.data_exists_for(ser, ["errorbar_x", "errorbar_y"]):
-                    self.drawer.scatter(
-                        *self.data_for(
-                            ser, ["errorbar_x", "errorbar_y", "errorbar_x_err", "errorbar_y_err"]
-                        ),
-                        name=ser,
-                        legend=self.legend_enabled_for(ser, "errorbar"),
-                    )
-                    self._log_plotted_data(ser, ["errorbar_x", "errorbar_y"])
-                    for data_key in ["errorbar_x_err", "errorbar_y_err"]:
-                        if self.data_exists_for(ser, data_key):
-                            self._log_plotted_data(ser, data_key)
+            if self.data_exists_for(ser, ["errorbar_x", "errorbar_y"]):
+                self.drawer.scatter(
+                    *self.data_for(
+                        ser, ["errorbar_x", "errorbar_y", "errorbar_x_err", "errorbar_y_err"]
+                    ),
+                    name=ser,
+                    legend=self.legend_enabled_for(ser, "errorbar"),
+                )
+                self._log_plotted_data(ser, ["errorbar_x", "errorbar_y"])
+                for data_key in ["errorbar_x_err", "errorbar_y_err"]:
+                    if self.data_exists_for(ser, data_key):
+                        self._log_plotted_data(ser, data_key)
 
-                if self.data_exists_for(ser, ["line_x", "line_y"]):
-                    self.drawer.line(
-                        *self.data_for(ser, ["line_x", "line_y"]),
-                        name=ser,
-                        legend=self.legend_enabled_for(ser, "line"),
-                    )
-                    self._log_plotted_data(ser, ["line_x", "line_y"])
+            if self.data_exists_for(ser, ["line_x", "line_y"]):
+                self.drawer.line(
+                    *self.data_for(ser, ["line_x", "line_y"]),
+                    name=ser,
+                    legend=self.legend_enabled_for(ser, "line"),
+                )
+                self._log_plotted_data(ser, ["line_x", "line_y"])
 
-                if self.data_exists_for(
-                    ser, ["filled_y_area_x", "filled_y_area_y_ub", "filled_y_area_y_lb"]
-                ):
-                    self.drawer.filled_y_area(
-                        *self.data_for(
-                            ser,
-                            ["filled_y_area_x", "filled_y_area_y_ub", "filled_y_area_y_lb"],
-                        ),
-                        name=ser,
-                        legend=self.legend_enabled_for(ser, "filled_y_area"),
-                    )
-                    self._log_plotted_data(
+            if self.data_exists_for(
+                ser, ["filled_y_area_x", "filled_y_area_y_ub", "filled_y_area_y_lb"]
+            ):
+                self.drawer.filled_y_area(
+                    *self.data_for(
                         ser,
                         ["filled_y_area_x", "filled_y_area_y_ub", "filled_y_area_y_lb"],
-                    )
+                    ),
+                    name=ser,
+                    legend=self.legend_enabled_for(ser, "filled_y_area"),
+                )
+                self._log_plotted_data(
+                    ser,
+                    ["filled_y_area_x", "filled_y_area_y_ub", "filled_y_area_y_lb"],
+                )
 
-                if self.data_exists_for(
-                    ser, ["filled_x_area_y", "filled_x_area_x_ub", "filled_x_area_x_lb"]
-                ):
-                    self.drawer.filled_x_area(
-                        *self.data_for(
-                            ser,
-                            ["filled_x_area_y", "filled_x_area_x_ub", "filled_x_area_x_lb"],
-                        ),
-                        name=ser,
-                        legend=self.legend_enabled_for(ser, "filled_x_area"),
-                    )
-                    self._log_plotted_data(
+            if self.data_exists_for(
+                ser, ["filled_x_area_y", "filled_x_area_x_ub", "filled_x_area_x_lb"]
+            ):
+                self.drawer.filled_x_area(
+                    *self.data_for(
                         ser,
                         ["filled_x_area_y", "filled_x_area_x_ub", "filled_x_area_x_lb"],
-                    )
+                    ),
+                    name=ser,
+                    legend=self.legend_enabled_for(ser, "filled_x_area"),
+                )
+                self._log_plotted_data(
+                    ser,
+                    ["filled_x_area_y", "filled_x_area_x_ub", "filled_x_area_x_lb"],
+                )
 
     @classmethod
     def expected_series_data_keys(cls) -> List[str]:

@@ -93,10 +93,10 @@ class BasisGateLibrary(ABC, Mapping):
 
     def __hash__(self) -> int:
         """Return the hash of the library by computing the hash of the schedule strings."""
-        data_to_hash = []
-        for name, schedule in sorted(self._schedules.items()):
-            data_to_hash.append((name, str(schedule), self.__supported_gates__[name]))
-
+        data_to_hash = [
+            (name, str(schedule), self.__supported_gates__[name])
+            for name, schedule in sorted(self._schedules.items())
+        ]
         return hash(tuple(data_to_hash))
 
     def __len__(self):
@@ -147,7 +147,7 @@ class BasisGateLibrary(ABC, Mapping):
         """Return the settings used to initialize the library."""
 
         kwargs = {"basis_gates": self.basis_gates, "default_values": self._default_values}
-        kwargs.update(self._extra_kwargs)
+        kwargs |= self._extra_kwargs
 
         return {
             "class": self.__class__.__name__,
@@ -263,12 +263,11 @@ class FixedFrequencyTransmon(BasisGateLibrary):
         sched_sx = self._single_qubit_schedule("sx", dur, sx_amp, sigma, sx_beta, sx_angle)
         sched_sy = self._single_qubit_schedule("sy", dur, sy_amp, sigma, sy_beta, sy_angle)
 
-        schedules = {}
-        for sched in [sched_x, sched_y, sched_sx, sched_sy]:
-            if sched.name in basis_gates:
-                schedules[sched.name] = sched
-
-        return schedules
+        return {
+            sched.name: sched
+            for sched in [sched_x, sched_y, sched_sx, sched_sy]
+            if sched.name in basis_gates
+        }
 
     @staticmethod
     def _single_qubit_schedule(

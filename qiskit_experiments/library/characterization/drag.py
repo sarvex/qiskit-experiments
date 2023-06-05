@@ -150,7 +150,7 @@ class RoughDrag(BaseExperiment, RestlessMixin):
         # Note: If the pulse has a reserved name, e.g. x, which does not have parameters
         # then we cannot directly call the gate x and attach a schedule to it. Doing so
         # would results in QObj errors.
-        drag_gate = Gate(name="Drag(" + schedule.name + ")", num_qubits=1, params=[beta])
+        drag_gate = Gate(name=f"Drag({schedule.name})", num_qubits=1, params=[beta])
 
         circuits = []
         for rep in self.experiment_options.reps:
@@ -164,7 +164,10 @@ class RoughDrag(BaseExperiment, RestlessMixin):
             circuit.measure_active()
 
             circuit.add_calibration(
-                "Drag(" + schedule.name + ")", self.physical_qubits, schedule, params=[beta]
+                f"Drag({schedule.name})",
+                self.physical_qubits,
+                schedule,
+                params=[beta],
             )
 
             for beta_val in self.experiment_options.betas:

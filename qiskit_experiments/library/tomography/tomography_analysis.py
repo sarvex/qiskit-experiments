@@ -286,12 +286,10 @@ class TomographyAnalysis(BaseAnalysis):
             qpt=qpt,
         )
 
-        # Convert to results
-        state_results = [
+        return [
             AnalysisResultData("state", state, extra=extra)
             for state, extra in zip(states, states_metadata)
         ]
-        return state_results
 
     def _fidelity_result(
         self,
@@ -441,10 +439,7 @@ class TomographyAnalysis(BaseAnalysis):
         qpt: bool = False,
     ) -> AnalysisResultData:
         """Faster computation of fidelity from eigen decomposition"""
-        if qpt:
-            input_dim = np.prod(state_result.value.input_dims())
-        else:
-            input_dim = 1
+        input_dim = np.prod(state_result.value.input_dims()) if qpt else 1
         evals = state_result.extra["eigvals"]
         evecs = state_result.extra["eigvecs"]
 
@@ -461,9 +456,8 @@ class TomographyAnalysis(BaseAnalysis):
 
         if target_state.ndim == 1:
             rho = evecs @ (evals / input_dim * evecs).T.conj()
-            fidelity = np.real(target_state.conj() @ rho @ target_state)
+            return np.real(target_state.conj() @ rho @ target_state)
         else:
             sqrt_rho = evecs @ (np.sqrt(evals / input_dim) * evecs).T.conj()
             eig = la.eigvalsh(sqrt_rho @ target_state @ sqrt_rho)
-            fidelity = np.sum(np.sqrt(np.maximum(eig, 0))) ** 2
-        return fidelity
+            return np.sum(np.sqrt(np.maximum(eig, 0))) ** 2

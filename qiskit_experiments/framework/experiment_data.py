@@ -89,10 +89,7 @@ def utc_to_local(utc_dt: datetime) -> datetime:
     Returns:
         A ``datetime`` with the local timezone.
     """
-    if utc_dt is None:
-        return None
-    local_dt = utc_dt.astimezone(tz.tzlocal())
-    return local_dt
+    return None if utc_dt is None else utc_dt.astimezone(tz.tzlocal())
 
 
 def local_to_utc(local_dt: datetime) -> datetime:
@@ -104,10 +101,7 @@ def local_to_utc(local_dt: datetime) -> datetime:
     Returns:
         A ``datetime`` with the UTC timezone.
     """
-    if local_dt is None:
-        return None
-    utc_dt = local_dt.astimezone(tz.UTC)
-    return utc_dt
+    return None if local_dt is None else local_dt.astimezone(tz.UTC)
 
 
 def parse_utc_datetime(dt_str: str) -> datetime:
@@ -172,17 +166,14 @@ class FigureData:
         if isinstance(self.figure, MatplotlibFigure):
             b = io.BytesIO()
             self.figure.savefig(b, format="png", bbox_inches="tight")
-            png = b.getvalue()
-            return png
+            return b.getvalue()
         else:
             return None
 
     def _repr_svg_(self):
         if isinstance(self.figure, str):
             return self.figure
-        if isinstance(self.figure, bytes):
-            return str(self.figure)
-        return None
+        return str(self.figure) if isinstance(self.figure, bytes) else None
 
 
 class ExperimentData:
@@ -271,10 +262,7 @@ class ExperimentData:
 
         self._experiment = experiment
 
-        # data stored in the database
-        metadata = {}
-        if experiment is not None:
-            metadata = copy.deepcopy(experiment._metadata())
+        metadata = {} if experiment is None else copy.deepcopy(experiment._metadata())
         source = metadata.pop(
             "_source",
             {
@@ -362,12 +350,11 @@ class ExperimentData:
     @property
     def completion_times(self) -> Dict[str, datetime]:
         """Returns the completion times of the jobs."""
-        job_times = {}
-        for job_id, job in self._jobs.items():
-            if job is not None and "COMPLETED" in job.time_per_step():
-                job_times[job_id] = job.time_per_step().get("COMPLETED")
-
-        return job_times
+        return {
+            job_id: job.time_per_step().get("COMPLETED")
+            for job_id, job in self._jobs.items()
+            if job is not None and "COMPLETED" in job.time_per_step()
+        }
 
     @property
     def tags(self) -> List[str]:
@@ -719,7 +706,7 @@ class ExperimentData:
             save_val: Whether to do auto-save.
         """
         # children will be saved once we set auto_save for them
-        if save_val is True:
+        if save_val:
             self.save(save_children=False)
         self._auto_save = save_val
         for res in self._analysis_results.values():
@@ -1050,10 +1037,11 @@ class ExperimentData:
 
         # first find which jobs are listed in the `job_ids` field of the experiment data
         if self.job_ids is not None:
-            for jid in self.job_ids:
-                if jid not in self._jobs or self._jobs[jid] is None:
-                    jobs_to_retrieve.append(jid)
-
+            jobs_to_retrieve.extend(
+                jid
+                for jid in self.job_ids
+                if jid not in self._jobs or self._jobs[jid] is None
+            )
         for jid in jobs_to_retrieve:
             try:
                 LOG.debug("Retrieving job [Job ID: %s]", jid)
@@ -1266,8 +1254,7 @@ class ExperimentData:
 
         if file_name:
             with open(file_name, "wb") as output:
-                num_bytes = output.write(figure_data.figure)
-                return num_bytes
+                return output.write(figure_data.figure)
         return figure_data
 
     @do_auto_save
@@ -1409,11 +1396,7 @@ class ExperimentData:
             ]
             if not filtered:
                 raise ExperimentEntryNotFound(_make_not_found_message(index))
-            if len(filtered) == 1:
-                return filtered[0]
-            else:
-                return filtered
-
+            return filtered[0] if len(filtered) == 1 else filtered
         raise TypeError(f"Invalid index type {type(index)}.")
 
     # Save and load from the database
@@ -1538,9 +1521,9 @@ class ExperimentData:
             LOG.warning("Could not save experiment metadata to DB, aborting experiment save")
             return
 
-        analysis_results_to_create = []
-        for result in self._analysis_results.values():
-            analysis_results_to_create.append(result._db_data)
+        analysis_results_to_create = [
+            result._db_data for result in self._analysis_results.values()
+        ]
         try:
             self.service.create_analysis_results(
                 data=analysis_results_to_create,
@@ -1788,8 +1771,7 @@ class ExperimentData:
         # Check for futures that were cancelled or errored
         excepts = ""
         for fut in waited.done:
-            ex = fut.exception()
-            if ex:
+            if ex := fut.exception():
                 excepts += "\n".join(traceback.format_exception(type(ex), ex, ex.__traceback__))
                 value = False
             elif fut.cancelled():
@@ -1849,7 +1831,7 @@ class ExperimentData:
             return ExperimentStatus.EMPTY
 
         # Return job status is job is not DONE
-        try:
+        with contextlib.suppress(KeyError):
             return {
                 JobStatus.INITIALIZING: ExperimentStatus.INITIALIZING,
                 JobStatus.QUEUED: ExperimentStatus.QUEUED,
@@ -1858,9 +1840,6 @@ class ExperimentData:
                 JobStatus.CANCELLED: ExperimentStatus.CANCELLED,
                 JobStatus.ERROR: ExperimentStatus.ERROR,
             }[self.job_status()]
-        except KeyError:
-            pass
-
         # Return analysis status if Done, cancelled or error
         try:
             return {
@@ -1900,24 +1879,22 @@ class ExperimentData:
             if not self._jobs:
                 return JobStatus.DONE
 
-            statuses = set()
-            for job in self._jobs.values():
-                if job:
-                    statuses.add(job.status())
-
-        # If any jobs are in non-DONE state return that state
-        for stat in [
-            JobStatus.ERROR,
-            JobStatus.CANCELLED,
-            JobStatus.RUNNING,
-            JobStatus.QUEUED,
-            JobStatus.VALIDATING,
-            JobStatus.INITIALIZING,
-        ]:
-            if stat in statuses:
-                return stat
-
-        return JobStatus.DONE
+            statuses = {job.status() for job in self._jobs.values() if job}
+        return next(
+            (
+                stat
+                for stat in [
+                    JobStatus.ERROR,
+                    JobStatus.CANCELLED,
+                    JobStatus.RUNNING,
+                    JobStatus.QUEUED,
+                    JobStatus.VALIDATING,
+                    JobStatus.INITIALIZING,
+                ]
+                if stat in statuses
+            ),
+            JobStatus.DONE,
+        )
 
     def analysis_status(self) -> AnalysisStatus:
         """Return the data analysis post-processing status.
@@ -1933,20 +1910,20 @@ class ExperimentData:
         Returns:
             Then analysis status.
         """
-        statuses = set()
-        for status in self._analysis_callbacks.values():
-            statuses.add(status.status)
-
-        for stat in [
-            AnalysisStatus.ERROR,
-            AnalysisStatus.CANCELLED,
-            AnalysisStatus.RUNNING,
-            AnalysisStatus.QUEUED,
-        ]:
-            if stat in statuses:
-                return stat
-
-        return AnalysisStatus.DONE
+        statuses = {status.status for status in self._analysis_callbacks.values()}
+        return next(
+            (
+                stat
+                for stat in [
+                    AnalysisStatus.ERROR,
+                    AnalysisStatus.CANCELLED,
+                    AnalysisStatus.RUNNING,
+                    AnalysisStatus.QUEUED,
+                ]
+                if stat in statuses
+            ),
+            AnalysisStatus.DONE,
+        )
 
     def job_errors(self) -> str:
         """Return any errors encountered in job execution."""
@@ -1955,10 +1932,7 @@ class ExperimentData:
         # Get any job errors
         for job in self._jobs.values():
             if job and job.status() == JobStatus.ERROR:
-                if hasattr(job, "error_message"):
-                    error_msg = job.error_message()
-                else:
-                    error_msg = ""
+                error_msg = job.error_message() if hasattr(job, "error_message") else ""
                 errors.append(f"\n[Job ID: {job.job_id()}]: {error_msg}")
 
         # Get any job futures errors:
@@ -1973,13 +1947,11 @@ class ExperimentData:
 
     def analysis_errors(self) -> str:
         """Return any errors encountered during analysis callbacks."""
-        errors = []
-
-        # Get any callback errors
-        for cid, callback in self._analysis_callbacks.items():
-            if callback.status == AnalysisStatus.ERROR:
-                errors.append(f"\n[Analysis Callback ID: {cid}]: {callback.error_msg}")
-
+        errors = [
+            f"\n[Analysis Callback ID: {cid}]: {callback.error_msg}"
+            for cid, callback in self._analysis_callbacks.items()
+            if callback.status == AnalysisStatus.ERROR
+        ]
         return "".join(errors)
 
     def errors(self) -> str:
@@ -2344,8 +2316,7 @@ class ExperimentData:
             # qiskit-ibm-provider style
             if hasattr(provider, "_account"):
                 token = provider._account.token
-            service = IBMExperimentService(token=token, url=db_url)
-            return service
+            return IBMExperimentService(token=token, url=db_url)
         except Exception:  # pylint: disable=broad-except
             return None
 

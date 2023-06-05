@@ -61,10 +61,7 @@ class DoNothingExperiment(BaseExperiment):
         )
         self.analysis.set_options(return_value=return_value)
 
-        if circuits is not None:
-            self._circuits = circuits
-        else:
-            self._circuits = []
+        self._circuits = circuits if circuits is not None else []
 
     def circuits(self):
         return self._circuits

@@ -67,12 +67,11 @@ class ResonatorSpectroscopyAnalysis(curve.ResonanceAnalysis):
 
                     # Average single-shot data.
                     if len(mem.shape) == 3:
-                        for idx in range(mem.shape[1]):
-                            iqs.append(np.average(mem[:, idx, :], axis=0))
+                        iqs.extend(np.average(mem[:, idx, :], axis=0) for idx in range(mem.shape[1]))
                     else:
                         iqs.append(mem)
 
-            if len(iqs) > 0:
+            if iqs:
                 iqs = np.vstack(iqs)
                 axis.scatter(iqs[:, 0], iqs[:, 1], color="b")
                 axis.set_xlabel(

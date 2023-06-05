@@ -35,10 +35,9 @@ def compute_probabilities_output(prob_list_output: List[Dict]) -> Dict[str, floa
         Dict: A dictionary for output strings and their probability.
     """
     output_dict = {}
-    for i in range(2):
-        for j in range(2):
-            output_str = str(i) + str(j)
-            output_dict[output_str] = prob_list_output[0][str(i)] * prob_list_output[1][str(j)]
+    for i, j in product(range(2), range(2)):
+        output_str = str(i) + str(j)
+        output_dict[output_str] = prob_list_output[0][str(i)] * prob_list_output[1][str(j)]
     return output_dict
 
 
@@ -99,10 +98,7 @@ class MockIQReadoutAmplitudeHelper(MockIQExperimentHelper):
         self.alter_widths = alter_widths
 
     def compute_probabilities(self, circuits: List[QuantumCircuit]) -> List[Dict[str, float]]:
-        probabilities = []
-        for circ in circuits:
-            probabilities.append({circ.metadata["prep"]: 1.0})
-        return probabilities
+        return [{circ.metadata["prep"]: 1.0} for circ in circuits]
 
     def iq_clusters(
         self,
@@ -239,11 +235,12 @@ class TestMockIQBackend(QiskitExperimentsTestCase):
         # Verify the centers of the clusters
         expected_centers_per_xval = []
         for xval in xvals:
-            # Add qubit 0 center for prepared state 0
-            expected_centers_per_xval.append(np.array(bare_centers[0][0]) * xval)
-            # Add qubit 0 center for prepared state 1
-            expected_centers_per_xval.append(np.array(bare_centers[0][1]) * xval)
-
+            expected_centers_per_xval.extend(
+                (
+                    np.array(bare_centers[0][0]) * xval,
+                    np.array(bare_centers[0][1]) * xval,
+                )
+            )
         for i, (expected_centers, data) in enumerate(zip(expected_centers_per_xval, res.results)):
             memory = np.array(data.data.memory)
             centers = np.squeeze(np.mean(memory, axis=0))
@@ -320,12 +317,9 @@ class TestMockIQBackend(QiskitExperimentsTestCase):
                 f"{num_shots_for_i} vs {num_shots}.",
             )
 
-        # Create list of expected widths per xval and prepared state
-        expected_widths_per_xval = []
-        for xval, _ in product(xvals, [0, 1]):
-            # Add qubit 0 width for prepared state prep and xval
-            expected_widths_per_xval.append(bare_widths[0] * xval)
-
+        expected_widths_per_xval = [
+            bare_widths[0] * xval for xval, _ in product(xvals, [0, 1])
+        ]
         # Check the width for each circuit run (in data)
         for i, (expected_width, data) in enumerate(zip(expected_widths_per_xval, res.results)):
             # Get the actual width (I and Q)

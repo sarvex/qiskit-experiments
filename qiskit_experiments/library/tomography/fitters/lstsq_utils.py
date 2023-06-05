@@ -234,8 +234,7 @@ def binomial_weights(
     # Use max weights to determin a min variance value and clip variance
     min_variance = 1 / (max_weight**2)
     variance = np.clip(variance, min_variance, None)
-    weights = 1.0 / np.sqrt(variance)
-    return weights
+    return 1.0 / np.sqrt(variance)
 
 
 def dirichlet_mean_and_var(

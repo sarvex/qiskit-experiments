@@ -38,9 +38,7 @@ def typecast_float(fit_func: Callable) -> Callable:
     def _wrapper(x, *args, **kwargs) -> Union[float, UFloat, np.ndarray]:
         yvals = fit_func(x, *args, **kwargs)
         try:
-            if isinstance(x, float):
-                return float(yvals)
-            return yvals.astype(float)
+            return float(yvals) if isinstance(x, float) else yvals.astype(float)
         except TypeError:
             return yvals
 

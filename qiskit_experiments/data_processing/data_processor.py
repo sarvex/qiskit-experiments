@@ -166,10 +166,7 @@ class DataProcessor:
             data = node(data)
 
             if with_history and (history_nodes is None or index in history_nodes):
-                if data.shape[0] == 1:
-                    cache_data = data[0]
-                else:
-                    cache_data = data
+                cache_data = data[0] if data.shape[0] == 1 else data
                 history.append(
                     (
                         node.__class__.__name__,
@@ -179,15 +176,8 @@ class DataProcessor:
                 )
 
         # Return only first entry if len(data) == 1, e.g. [[0, 1]] -> [0, 1]
-        if data.shape[0] == 1:
-            out_data = data[0]
-        else:
-            out_data = data
-
-        if with_history:
-            return out_data, history
-        else:
-            return out_data
+        out_data = data[0] if data.shape[0] == 1 else data
+        return (out_data, history) if with_history else out_data
 
     def train(self, data: Union[Dict, List[Dict]]):
         """Train the nodes of the data processor.
@@ -244,37 +234,33 @@ class DataProcessor:
                 # Validate data shape
                 if dims is None:
                     dims = outcome.shape
-                else:
-                    # This is because each data node creates full array of all result data.
-                    # Jagged array cannot be numerically operated with numpy array.
-                    if outcome.shape != dims:
-                        raise DataProcessorError(
-                            "Input data is likely a mixture of job results with different "
-                            "measurement setup. Data processor doesn't support jagged array."
-                        )
+                elif outcome.shape != dims:
+                    raise DataProcessorError(
+                        "Input data is likely a mixture of job results with different "
+                        "measurement setup. Data processor doesn't support jagged array."
+                    )
             data_to_process.append(outcome)
 
         data_to_process = np.asarray(data_to_process)
 
-        if data_to_process.dtype in (float, int):
-            # Likely level1 or below. Return ufloat array with un-computed std_dev.
-            # The output data format is a standard ndarray with dtype=object with
-            # arbitrary shape [n_circuits, ...] depending on the measurement setup.
-            nominal_values = np.asarray(data_to_process, float)
-            with np.errstate(invalid="ignore"):
-                # Setting std_devs to NaN will trigger floating point exceptions
-                # which we can ignore. See https://stackoverflow.com/q/75656026
-                uarray = unp.uarray(
-                    nominal_values=nominal_values,
-                    std_devs=np.full_like(nominal_values, np.nan, dtype=float),
-                )
-            return uarray
-        else:
+        if data_to_process.dtype not in (float, int):
             # Likely level2 counts or level2 memory data. Cannot be typecasted to ufloat.
             # The output data format is a standard ndarray with dtype=object with
             # shape [n_circuits] or [n_circuits, n_shots].
             # No error value is bound.
             return np.asarray(data_to_process, dtype=object)
+        # Likely level1 or below. Return ufloat array with un-computed std_dev.
+        # The output data format is a standard ndarray with dtype=object with
+        # arbitrary shape [n_circuits, ...] depending on the measurement setup.
+        nominal_values = np.asarray(data_to_process, float)
+        with np.errstate(invalid="ignore"):
+            # Setting std_devs to NaN will trigger floating point exceptions
+            # which we can ignore. See https://stackoverflow.com/q/75656026
+            uarray = unp.uarray(
+                nominal_values=nominal_values,
+                std_devs=np.full_like(nominal_values, np.nan, dtype=float),
+            )
+        return uarray
 
     def __repr__(self):
         """String representation of data processors."""

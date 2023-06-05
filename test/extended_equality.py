@@ -74,12 +74,7 @@ def is_equivalent(
         strict_type=strict_type,
         numerical_precision=numerical_precision,
     )
-    if not isinstance(evaluated, (bool, np.bool_)):
-        # When either one of input is numpy array type, it may broadcast equality check
-        # and return ndarray of dtype=bool. e.g. np.array([]) == 123
-        # The input values should not be equal in this case.
-        return False
-    return evaluated
+    return False if not isinstance(evaluated, (bool, np.bool_)) else evaluated
 
 
 @multimethod

@@ -68,7 +68,7 @@ class QiskitExperimentsTestCase(QiskitTestCase):
         self.assertEqual(
             experiment_data.status(),
             ExperimentStatus.DONE,
-            msg="All threads are executed but status is not DONE. " + experiment_data.errors(),
+            msg=f"All threads are executed but status is not DONE. {experiment_data.errors()}",
         )
 
     def assertEqualExtended(

@@ -69,7 +69,7 @@ def used_in_references(keys: Set[ScheduleKey], dag: rx.PyDiGraph) -> Set[str]:
     for key in keys:
         callers.update(dag.nodes()[idx] for idx in rx.ancestors(dag, _get_node_index(key, dag)))
 
-    return set(key.schedule for key in callers)
+    return {key.schedule for key in callers}
 
 
 def _get_node_index(key: ScheduleKey, dag: rx.PyDiGraph) -> int:

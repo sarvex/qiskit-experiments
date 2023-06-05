@@ -36,9 +36,11 @@ def discover_files(code_paths):
         else:
             for directory in os.walk(path):
                 dir_path = directory[0]
-                for subfile in directory[2]:
-                    if subfile.endswith(".py") or subfile.endswith(".pyx"):
-                        out_paths.append(os.path.join(dir_path, subfile))
+                out_paths.extend(
+                    os.path.join(dir_path, subfile)
+                    for subfile in directory[2]
+                    if subfile.endswith(".py") or subfile.endswith(".pyx")
+                )
     return out_paths
 
 
@@ -48,15 +50,6 @@ def validate_header(file_path):
     """
     header = """# This code is part of Qiskit.
 #
-"""
-    apache_text = """#
-# This code is licensed under the Apache License, Version 2.0. You may
-# obtain a copy of this license in the LICENSE.txt file in the root directory
-# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
-#
-# Any modifications or derivative works of this code must retain this
-# copyright notice, and modified files need to carry a notice indicating
-# that they have been altered from the originals.
 """
     count = 0
     with open(file_path, encoding="utf8") as fd:
@@ -75,9 +68,24 @@ def validate_header(file_path):
         return (file_path, False, f"Header up to copyright line does not match: {header}")
     if not lines[start + 2].startswith("# (C) Copyright IBM 20"):
         return (file_path, False, "Header copyright line not found")
-    if "".join(lines[start + 3 : start + 11]) != apache_text:
-        return (file_path, False, f"Header apache text string doesn't match:\n {apache_text}")
-    return (file_path, True, None)
+    apache_text = """#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+"""
+    return (
+        (
+            file_path,
+            False,
+            f"Header apache text string doesn't match:\n {apache_text}",
+        )
+        if "".join(lines[start + 3 : start + 11]) != apache_text
+        else (file_path, True, None)
+    )
 
 
 def main():
@@ -92,8 +100,7 @@ def main():
     files = discover_files(args.paths)
     with multiprocessing.Pool() as pool:
         res = pool.map(validate_header, files)
-    failed_files = [x for x in res if x[1] is False]
-    if len(failed_files) > 0:
+    if failed_files := [x for x in res if x[1] is False]:
         for failed_file in failed_files:
             sys.stderr.write(f"{failed_file[0]} failed header check because:\n")
             sys.stderr.write(f"{failed_file[2]}\n\n")

@@ -333,15 +333,13 @@ class PulseBackend(BackendV2):
 
         signal = self.converter.get_signals(schedule)
         time_f = schedule.duration * self.dt
-        unitary = self.solver.solve(
+        return self.solver.solve(
             t_span=[0.0, time_f],
             y0=self.y_0,
             t_eval=[time_f],
             signals=signal,
             method=self.solver_method,
         ).y[0]
-
-        return unitary
 
     def run(self, run_input: Union[QuantumCircuit, List[QuantumCircuit]], **run_options) -> FakeJob:
         """Run method takes circuits as input and returns FakeJob with IQ data or counts.
@@ -494,7 +492,7 @@ class SingleTransmonTestBackend(PulseBackend):
         self.rabi_rate_01 = 8.589
         self.rabi_rate_12 = 6.876
 
-        if noise is True:
+        if noise:
             evaluation_mode = "dense_vectorized"
             static_dissipators = [t1_dissipator]
         else:

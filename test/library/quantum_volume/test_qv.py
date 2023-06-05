@@ -215,9 +215,9 @@ class TestQuantumVolume(QiskitExperimentsTestCase):
         with open(os.path.join(dir_name, successful_json_file), "r", encoding="utf-8") as json_file:
             successful_data = json.load(json_file, cls=ExperimentDecoder)
 
-        num_of_qubits = 4
         backend = Aer.get_backend("aer_simulator")
 
+        num_of_qubits = 4
         qv_exp = QuantumVolume(range(num_of_qubits), seed=SEED)
         exp_data = ExperimentData(experiment=qv_exp, backend=backend)
         exp_data.add_data(successful_data)
@@ -252,13 +252,12 @@ class TestQuantumVolume(QiskitExperimentsTestCase):
                     self.assertAlmostEqual(
                         result.extra[key],
                         value,
-                        msg="result " + str(key) + " is not the same as the "
-                        "pre-calculated analysis",
+                        msg=f"result {str(key)} is not the same as the pre-calculated analysis",
                     )
                 else:
                     self.assertTrue(
                         result.extra[key] == value,
-                        "result " + str(key) + " is not the same as the " "pre-calculated analysis",
+                        f"result {str(key)} is not the same as the pre-calculated analysis",
                     )
 
     def test_experiment_config(self):

@@ -71,10 +71,10 @@ class TestT2Hahn(QiskitExperimentsTestCase):
         self.assertExperimentDone(expdata, timeout=300)
         self.assertRoundTripSerializable(expdata)
         self.assertRoundTripPickle(expdata)
-        result = expdata.analysis_results("T2")
-        fitval = result.value
         if num_of_echoes != 0:
+            result = expdata.analysis_results("T2")
             self.assertEqual(result.quality, "good")
+            fitval = result.value
             # Check that fit is within 20%. This bound can be reduced by using
             # more shots, but testing with some degree of noise is more
             # realistic.

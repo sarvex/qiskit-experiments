@@ -278,7 +278,7 @@ class BaseCurveDrawer(ABC):
 
     def config(self) -> Dict:
         """Return the config dictionary for this drawing."""
-        options = dict((key, getattr(self._options, key)) for key in self._set_options)
+        options = {key: getattr(self._options, key) for key in self._set_options}
 
         return {"cls": type(self), "options": options}
 

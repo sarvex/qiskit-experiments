@@ -51,8 +51,8 @@ class BaseDataProcessorTest(QiskitExperimentsTestCase):
             single_shot: Indicates if the data is single-shot or not.
         """
         results = []
-        if not single_shot:
-            for circ_data in iq_data:
+        for circ_data in iq_data:
+            if not single_shot:
                 res = ExperimentResult(
                     success=True,
                     meas_level=1,
@@ -61,9 +61,7 @@ class BaseDataProcessorTest(QiskitExperimentsTestCase):
                     header=self.header,
                     shots=1024,
                 )
-                results.append(res)
-        else:
-            for circ_data in iq_data:
+            else:
                 res = ExperimentResult(
                     success=True,
                     meas_level=1,
@@ -72,8 +70,7 @@ class BaseDataProcessorTest(QiskitExperimentsTestCase):
                     header=self.header,
                     shots=1024,
                 )
-                results.append(res)
-
+            results.append(res)
         # pylint: disable=attribute-defined-outside-init
         self.iq_experiment = ExperimentData(FakeExperiment())
         self.iq_experiment.add_data(Result(results=results, **self.base_result_args))

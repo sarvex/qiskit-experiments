@@ -77,7 +77,7 @@ class QiskitExperimentDocstring(ABC):
         **extra_sections: List[str],
     ) -> Dict[str, List[str]]:
         """Classify formatted docstring into sections."""
-        sectioned_docstrings = dict()
+        sectioned_docstrings = {}
 
         for sec_key, parsed_lines in extra_sections.items():
             if sec_key not in self.__sections__:
@@ -91,8 +91,7 @@ class QiskitExperimentDocstring(ABC):
         min_indent = sys.maxsize
         tmp_lines = []
         for line in docstring_lines:
-            matched = _section_regex.match(line)
-            if matched:
+            if matched := _section_regex.match(line):
                 # Process previous section
                 if min_indent < sys.maxsize:
                     tmp_lines = [_line[min_indent:] for _line in tmp_lines]
@@ -139,8 +138,7 @@ class QiskitExperimentDocstring(ABC):
         for section, lines in self._parsed_lines.items():
             if not lines:
                 continue
-            section_formatter = getattr(formatter, f"format_{section}", None)
-            if section_formatter:
+            if section_formatter := getattr(formatter, f"format_{section}", None):
                 formatted_sections[section] = section_formatter(lines)
             else:
                 formatted_sections[section] = lines + [""]
@@ -184,8 +182,7 @@ class ExperimentDocstring(QiskitExperimentDocstring):
 
         # add see also for super classes
         if "see_also" not in sectioned_docstring:
-            class_refs = _get_superclass(current_class, BaseExperiment)
-            if class_refs:
+            if class_refs := _get_superclass(current_class, BaseExperiment):
                 sectioned_docstring["see_also"] = class_refs
 
         # add analysis reference, if nothing described, it copies from parent
@@ -228,8 +225,7 @@ class AnalysisDocstring(QiskitExperimentDocstring):
 
         # add see also for super classes
         if "see_also" not in sectioned_docstring:
-            class_refs = _get_superclass(current_class, BaseAnalysis)
-            if class_refs:
+            if class_refs := _get_superclass(current_class, BaseAnalysis):
                 sectioned_docstring["see_also"] = class_refs
 
 

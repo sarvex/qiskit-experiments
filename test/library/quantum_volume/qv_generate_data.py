@@ -137,15 +137,14 @@ def create_qv_data_high_confidence(dir_path: str):
 
     result_file_path = os.path.join(dir_path, "qv_result_moderate_noise_300_trials.json")
     with open(result_file_path, "w", encoding="utf-8") as json_file:
-        result_dicts = []
-        for result in qv_data.analysis_results():
-            result_dicts.append(
-                {
-                    "name": result.name,
-                    "value": result.value,
-                    "extra": result.extra,
-                }
-            )
+        result_dicts = [
+            {
+                "name": result.name,
+                "value": result.value,
+                "extra": result.extra,
+            }
+            for result in qv_data.analysis_results()
+        ]
         json.dump(result_dicts, json_file, cls=ExperimentEncoder)
 
 
@@ -219,15 +218,15 @@ def main(argv):
     """Run data generation script"""
     directory = os.path.dirname(os.path.abspath(__file__))
     for generation_type in argv:
-        if generation_type == "circuits":
-            create_qv_ideal_probabilities(directory)
-        elif generation_type == "analysis":
+        if generation_type == "analysis":
             create_qv_data_70_trials(directory)
             create_qv_data_low_hop(directory)
             create_qv_data_low_confidence(directory)
             create_qv_data_high_confidence(directory)
+        elif generation_type == "circuits":
+            create_qv_ideal_probabilities(directory)
         else:
-            print("Skipping unknown argument " + generation_type)
+            print(f"Skipping unknown argument {generation_type}")
 
 
 if __name__ == "__main__":

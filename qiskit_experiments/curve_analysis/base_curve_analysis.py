@@ -260,14 +260,12 @@ class BaseCurveAnalysis(BaseAnalysis, ABC):
             if isinstance(fields["curve_drawer"], BaseDrawer):
                 plotter = self.options.plotter
                 plotter.drawer = fields.pop("curve_drawer")
-                fields["plotter"] = plotter
             else:
                 drawer = fields["curve_drawer"]
                 compat_drawer = LegacyCurveCompatDrawer(drawer)
                 plotter = self.options.plotter
                 plotter.drawer = compat_drawer
-                fields["plotter"] = plotter
-
+            fields["plotter"] = plotter
         super().set_options(**fields)
 
     @abstractmethod
@@ -335,9 +333,7 @@ class BaseCurveAnalysis(BaseAnalysis, ABC):
         Returns:
             String that represents fit result quality. Usually "good" or "bad".
         """
-        if fit_data.reduced_chisq < 3.0:
-            return "good"
-        return "bad"
+        return "good" if fit_data.reduced_chisq < 3.0 else "bad"
 
     def _create_analysis_results(
         self,

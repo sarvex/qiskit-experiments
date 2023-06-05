@@ -219,7 +219,7 @@ class TestOscillationAnalysis(QiskitExperimentsTestCase):
         circuits = transpile(circuits, sim)
         job = sim.run(circuits, shots=shots, seed_simulator=10)
         result = job.result()
-        data = [
+        return [
             {
                 "counts": self._add_uncertainty(result.get_counts(i)),
                 "metadata": {
@@ -230,7 +230,6 @@ class TestOscillationAnalysis(QiskitExperimentsTestCase):
             }
             for i, theta in enumerate(thetas)
         ]
-        return data
 
     @staticmethod
     def _add_uncertainty(counts):
@@ -299,7 +298,7 @@ class TestCompositeExperiment(QiskitExperimentsTestCase):
         try:
             transpile(par_circ, basis_gates=["rz", "sx", "x", "cx"])
         except QiskitError as error:
-            self.fail("Failed to transpile with error: " + str(error))
+            self.fail(f"Failed to transpile with error: {str(error)}")
 
         # Assert that the calibration keys are in the calibrations of the composite circuit.
         for qubit in range(3):

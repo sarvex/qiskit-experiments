@@ -150,11 +150,7 @@ def get_height(
     Returns:
         The target y value and index.
     """
-    if absolute:
-        y_ = np.abs(y)
-    else:
-        y_ = y
-
+    y_ = np.abs(y) if absolute else y
     y_target = find_height(y_)
     index = int(np.argmin(np.abs(y_ - y_target)))
 
@@ -321,10 +317,7 @@ def constant_spectral_offset(
         (ydiff1 < ratio * np.nanmax(ydiff1)) & (ydiff2 < ratio * np.nanmax(ydiff2))
     ]
 
-    if len(non_peaks) == 0:
-        return float(np.median(y))
-
-    return np.average(non_peaks)
+    return float(np.median(y)) if len(non_peaks) == 0 else np.average(non_peaks)
 
 
 def constant_sinusoidal_offset(y: np.ndarray) -> float:

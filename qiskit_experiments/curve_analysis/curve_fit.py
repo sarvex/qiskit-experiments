@@ -98,10 +98,7 @@ def curve_fit(
     else:
         param_keys = [f"p{i}" for i in range(len(p0))]
         param_p0 = p0
-        if bounds:
-            param_bounds = bounds
-        else:
-            param_bounds = ([-np.inf] * len(p0), [np.inf] * len(p0))
+        param_bounds = bounds if bounds else ([-np.inf] * len(p0), [np.inf] * len(p0))
         fit_func = func
 
     # Check the degrees of freedom is greater than 0

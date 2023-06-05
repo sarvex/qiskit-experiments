@@ -103,13 +103,12 @@ class QuantumVolumeAnalysis(BaseAnalysis):
         }
 
         median_probabilities = float(np.real(np.median(probabilities_vector)))
-        heavy_strings = list(
+        return list(
             filter(
                 lambda x: all_output_prob_ideal[x] > median_probabilities,
                 list(all_output_prob_ideal.keys()),
             )
         )
-        return heavy_strings
 
     @staticmethod
     def _calc_exp_heavy_output_probability(data, heavy_outputs):
@@ -148,9 +147,7 @@ class QuantumVolumeAnalysis(BaseAnalysis):
             sigma = 1e-10
             warnings.warn("Standard deviation sigma should not be zero.")
 
-        z_value = (mean - 2 / 3) / sigma
-
-        return z_value
+        return (mean - 2 / 3) / sigma
 
     @staticmethod
     def _calc_confidence_level(z_value):
@@ -167,9 +164,7 @@ class QuantumVolumeAnalysis(BaseAnalysis):
             float: confidence level in decimal (not percentage).
         """
 
-        confidence_level = 0.5 * (1 + math.erf(z_value / 2**0.5))
-
-        return confidence_level
+        return 0.5 * (1 + math.erf(z_value / 2**0.5))
 
     def _calc_quantum_volume(self, heavy_output_prob_exp, depth, trials):
         """
@@ -201,11 +196,7 @@ class QuantumVolumeAnalysis(BaseAnalysis):
         threshold = 2 / 3 + z * sigma_hop
         z_value = self._calc_z_value(mean_hop, sigma_hop)
         confidence_level = self._calc_confidence_level(z_value)
-        if confidence_level > 0.977:
-            quality = "good"
-        else:
-            quality = "bad"
-
+        quality = "good" if confidence_level > 0.977 else "bad"
         # Must have at least 100 trials
         if trials < 100:
             warnings.warn("Must use at least 100 trials to consider Quantum Volume as successful.")

@@ -145,21 +145,21 @@ class RestlessMixin:
                     "The restless data processor can not be set since the experiment analysis"
                     "does not have the data_processor option."
                 )
+        elif override_processor_by_restless:
+            raise DataProcessorError(
+                "Cannot enable restless. Data processor has already been set and "
+                "override_processor_by_restless is True."
+            )
+
         else:
-            if not override_processor_by_restless:
-                self.set_run_options(
-                    rep_delay=rep_delay,
-                    init_qubits=False,
-                    memory=True,
-                    meas_level=meas_level,
-                    meas_return=meas_return,
-                    use_measure_esp=False,
-                )
-            else:
-                raise DataProcessorError(
-                    "Cannot enable restless. Data processor has already been set and "
-                    "override_processor_by_restless is True."
-                )
+            self.set_run_options(
+                rep_delay=rep_delay,
+                init_qubits=False,
+                memory=True,
+                meas_level=meas_level,
+                meas_return=meas_return,
+                use_measure_esp=False,
+            )
 
     def _get_restless_processor(self, meas_level: int = MeasLevel.CLASSIFIED) -> DataProcessor:
         """Returns the restless experiments data processor.
